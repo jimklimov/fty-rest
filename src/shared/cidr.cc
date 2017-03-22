@@ -28,6 +28,7 @@
 #include "cidr.h"
 #include <cstdio>
 #include <stdlib.h>
+#include <netdb.h>
 #include <string.h>
 
 namespace shared {
