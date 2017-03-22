@@ -326,7 +326,7 @@ libpriv_csv_la_CPPFLAGS =$(AM_CPPFLAGS) \
 			-I$(abs_top_builddir)/tools \
 			-I$(abs_top_src_dir)/src/msg
 
-libpriv_csv_la_LIBADD = ${CXXTOOLS_LIBS} -ltntdb
+libpriv_csv_la_LIBADD = ${CXXTOOLS_LIBS} ${TNTDB_LIBS}
 
 noinst_LTLIBRARIES += 		libpriv-db.la
 
@@ -530,7 +530,7 @@ test_web_helpers_CPPFLAGS =	$(AM_CPPFLAGS) \
 							-I$(abs_top_srcdir)/tests/include/ \
 							-I$(abs_top_srcdir)/src/web/include
 
-test_web_helpers_LDFLAGS =	-ltntnet -ltntdb ${CXXTOOLS_LIBS} ${LIBCZMQ_LIBS}
+test_web_helpers_LDFLAGS =	${TNTNET_LIBS} ${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCZMQ_LIBS}
 
 ###
 check_PROGRAMS +=	test-utils-web
@@ -649,7 +649,7 @@ test_csv_CPPFLAGS =		$(AM_CPPFLAGS) \
 			-I$(abs_top_srcdir)/src/msg \
 			-I$(abs_top_srcdir)/tests/include
 
-test_csv_LDFLAGS =		${CXXTOOLS_LIBS}  -ltntdb
+test_csv_LDFLAGS =		${CXXTOOLS_LIBS} ${TNTDB_LIBS}
 
 #----------------------------------------------------------------------
 #                        CI tests
@@ -679,7 +679,7 @@ test_loadcsv_CPPFLAGS = \
 			-I$(abs_top_srcdir)/tools \
 			-I$(abs_top_builddir)/tools
 
-test_loadcsv_LDFLAGS =	-ltntdb ${CXXTOOLS_LIBS} ${LIBCZMQ_LIBS}
+test_loadcsv_LDFLAGS =	${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCZMQ_LIBS}
 
 
 cibin_programs += 	test-db2
@@ -704,7 +704,7 @@ test_db2_CPPFLAGS =	$(AM_CPPFLAGS) \
 			-I$(abs_top_srcdir)/src/db \
 			-I$(abs_top_srcdir)/src
 
-test_db2_LDFLAGS =	-ltntdb ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
+test_db2_LDFLAGS =	${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
 
 cibin_programs += 	test-dbtopology
 
@@ -732,7 +732,7 @@ test_dbtopology_CPPFLAGS = \
 			-I$(abs_top_builddir)/tools
 
 test_dbtopology_LDFLAGS = \
-			-ltntdb ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
+			${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
 
 
 cibin_programs += 	test-db-asset-crud
@@ -759,7 +759,7 @@ test_db_asset_crud_CPPFLAGS = \
 			-I$(abs_top_builddir)/tools
 
 test_db_asset_crud_LDFLAGS = \
-			-ltntdb ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
+			${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
 
 
 #### total power tests
@@ -785,7 +785,7 @@ test_totalpower_CPPFLAGS = \
 			-I$(abs_top_builddir)/tools
 
 test_totalpower_LDFLAGS = \
-			-ltntdb ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
+			${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBCIDR_LIBS} ${LIBCZMQ_LIBS}
 
 
 # Do we build and install CI programs by default? (see configure)
@@ -807,7 +807,7 @@ CLEANFILES += $(cibin_programs_list)
 web-link-test: bios_web.la
 			$(CXX) $(AM_CPPFLAGS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -o /dev/null \
 			$(abs_top_srcdir)/tests/web-linking-test.cc \
-			${CXXTOOLS_LIBS} -ltntnet \
+			${CXXTOOLS_LIBS} ${TNTNET_LIBS} \
 			$(abs_top_builddir)/.libs/bios_web.so && \
 			echo "PASS: dynamic-link compilation test: everything for bios_web.so does link ok!" || \
 			( R=$$?; echo "FAIL ($$R): dynamic-link compilation test: bios_web.so unusable"; exit $$R; )
@@ -847,7 +847,7 @@ bios_csv_LDADD = \
 						 libpriv-utils-plusplus.la \
 						 libpriv-csv.la
 bios_csv_LDFLAGS = \
-						 ${CXXTOOLS_LIBS} -ltntdb ${LIBCZMQ_LIBS}
+						 ${CXXTOOLS_LIBS} ${TNTDB_LIBS} ${LIBCZMQ_LIBS}
 
 #XXX: $(localstatedir) did not worked
 #FIXME: installing things to /var is not a good idea according FHS or GNU standards
@@ -896,7 +896,7 @@ warranty_metric_CPPFLAGS =	$(AM_CPPFLAGS) \
 			-I$(abs_top_builddir)/tools \
 			-I$(abs_top_srcdir)/src/db
 
-warranty_metric_LDFLAGS = ${LIBCZMQ_LIBS} ${LIBMLM_LIBS} -ltntdb ${CXXTOOLS_LIBS} ${LIBFTYPROTO_LIBS}
+warranty_metric_LDFLAGS = ${LIBCZMQ_LIBS} ${LIBMLM_LIBS} ${TNTDB_LIBS} ${CXXTOOLS_LIBS} ${LIBFTYPROTO_LIBS}
 
 ###################################################################
 # Web Library (tntnet dynamic module for $BIOS REST API)
@@ -976,12 +976,11 @@ bios_web_la_CPPFLAGS =	$(AM_CPPFLAGS) \
 			-I$(abs_top_srcdir)/src/agents/configure_inform \
 			-I$(abs_top_srcdir)/src/db/assets
 
-# Note: the libmagic we use delivers no pkg-config, so we include it explicitly
 bios_web_la_LDFLAGS = 	${LIBCZMQ_LIBS}	${CXXTOOLS_LIBS} \
 			${LIBSODIUM_LIBS} ${LIBSASL2_LIBS} \
 			${LIBBIOSPROTO_LIBS} \
 			$(LDFLAGS_NO_UNDEFS) \
-			-module -lm -ltntdb -ltntnet ${LIBCIDR_LIBS} -lmagic ${LIBMLM_LIBS} ${LIBFTYPROTO_LIBS} -lz
+			-module -lm ${TNTDB_LIBS} ${TNTNET_LIBS} ${LIBCIDR_LIBS} ${LIBMAGIC_LIBS} ${LIBMLM_LIBS} ${LIBFTYPROTO_LIBS} -lz
 
 bios_web_la_LIBADD = \
 			libpriv-db.la libpriv-cidr.la libpriv-proto.la \
