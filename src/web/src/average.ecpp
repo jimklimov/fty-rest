@@ -94,6 +94,7 @@ UserInfo user;
     bool checked_ordered = false;
     uint32_t checked_element_id;
     std::string checked_relative;
+    std::string checked_format;
     {
         std::string start_ts = qparam.param("start_ts");
         std::string end_ts = qparam.param("end_ts");
@@ -102,6 +103,7 @@ UserInfo user;
         std::string source = qparam.param("source");
         std::string element_id = qparam.param("element_id");
         std::string relative = qparam.param("relative");
+        std::string format = qparam.param("format");
         std::string ordered = qparam.param("ordered");
 
         check_regex_text_or_die ("start_ts", start_ts, checked_start_ts, "^([0-9]{14}Z|)$");
@@ -115,6 +117,11 @@ UserInfo user;
         check_regex_text_or_die ("ordered", ordered, ordered, "^(true|false|)$");
         if ( ordered == "true" ) {
             checked_ordered = true;
+        }
+
+        check_regex_text_or_die ("format", format, checked_format, "^(json|csv|)$");
+        if (checked_format.empty ()) {
+            checked_format = "json";
         }
     }
     int64_t st = -1, end = -1;
@@ -203,6 +210,7 @@ UserInfo user;
         http_die ("internal-error", "mlm_pool.get () failed.");
     }
 
+    /* TODO: Query and combine all 3 data types for CSV export */
     zuuid_t *uuid = zuuid_new ();
     zmsg_t *msg = zmsg_new();
     zmsg_addstr (msg, zuuid_str_canonical (uuid));
@@ -259,6 +267,7 @@ UserInfo user;
         char *end_date_rep = zmsg_popstr (recv_msg);
         char *ordered = zmsg_popstr (recv_msg);
         char *units_rep = zmsg_popstr (recv_msg);
+        if ( checked_format == "json" ) {
 </%cpp>
 {
         <$$ utils::json::jsonify ("units", units_rep) $>,
@@ -270,6 +279,21 @@ UserInfo user;
         <$$ utils::json::jsonify ("end_ts", end_date_rep) $>,
         "data":[
 <%cpp>
+        } else if ( checked_format == "csv" ) {
+            /* TODO: Set up exported file name and MIME type */
+</%cpp>
+"The table below contains the following selection of asset metrics:"
+"Asset name","<$$ element_rep $>"
+"Asset type","<$$ type_rep $>"
+"Source","<$$ source_rep $>"
+"Units","<$$ units_rep $>"
+"Starting timestamp","<$$ start_date_rep $>"
+"Ending timestamp","<$$ end_date_rep $>"
+"Granularity","<$$ step_rep $>"
+""
+"timestamp","min","max","average"
+<%cpp>
+        }
         // first of all, need to clean up
         zstr_free (&element_rep);
         zstr_free (&source_rep);
@@ -282,6 +306,8 @@ UserInfo user;
         while  ( zmsg_size (recv_msg) >= 2 ) {
             char *timestamp = zmsg_popstr (recv_msg);
             char *value = zmsg_popstr (recv_msg);
+
+            if ( checked_format == "json" ) {
             </%cpp>
 {
     "value": <$$ value $>,
@@ -289,13 +315,22 @@ UserInfo user;
     "scale": 0
 } <$$ zmsg_size (recv_msg) != 0 ? "," : "" $>
             <%cpp>
+            } else if ( checked_format == "csv" ) {
+            /* TODO: Query and combine all 3 data types */
+            </%cpp>
+<$$ timestamp $>,<$$ value $>
+            <%cpp>
+            }
             zstr_free (&value);
             zstr_free (&timestamp);
         }
+
+        if ( checked_format == "json" ) {
 </%cpp>
         ]
 }
 <%cpp>
+        } /* No closing tags for CSV */
     }
     zmsg_destroy (&recv_msg);
 </%cpp>
