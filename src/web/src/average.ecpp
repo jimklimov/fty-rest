@@ -298,7 +298,8 @@ UserInfo user;
             zmsg_destroy (&recv_msg);
         } // end for-cycle
 
-        reply.setHeader(tnt::httpheader::contentDisposition, "attachment; filename=\"testicek.csv\"");
+        std::string export_file_name = "export_" + checked_start_ts + "_" + checked_end_ts + "_" + checked_step + "_" + checked_source + "_" + element_name + ".csv";
+        reply.setHeader(tnt::httpheader::contentDisposition, std::string ("attachment; filename=\"" + export_file_name + "\"").c_str ());
         cxxtools::CsvSerializer serializer (reply.out ());
         serializer.serialize (csv_data);
 
@@ -367,7 +368,7 @@ UserInfo user;
         <$$ utils::json::jsonify ("source", source_rep) $>,
         <$$ utils::json::jsonify ("step", step_rep) $>,
         <$$ utils::json::jsonify ("type", type_rep) $>,
-        <$$ utils::json::jsonify ("element_id", std::to_string(checked_element_id)) $>,
+        <$$ utils::json::jsonify ("element_id", element_name) $>,
         <$$ utils::json::jsonify ("start_ts", start_date_rep) $>,
         <$$ utils::json::jsonify ("end_ts", end_date_rep) $>,
         "data":[
