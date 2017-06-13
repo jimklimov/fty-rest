@@ -61,7 +61,7 @@
 	static cxxtools::Regex rex_GET_undecided("^/api/v1/admin/getlog/.*$");
 
 	if(request.getMethod() == "GET") {
-		log_debug( ("GetURL==" + request.getUrl()).c_str() );
+		log_debug("%s", ("GetURL==" + request.getUrl()).c_str() );
 
 		if(rex_GET_text_plain.match(request.getUrl()))
 			reply.setContentType("text/plain;charset=UTF-8");
