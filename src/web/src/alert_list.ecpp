@@ -90,7 +90,7 @@ is_state_included (const char *request, const char *alert) {
 </%pre>
 <%request scope="global">
 UserInfo user;
-bool database_ready;
+//bool database_ready;
 </%request>
 <%cpp>
     // verify server is ready

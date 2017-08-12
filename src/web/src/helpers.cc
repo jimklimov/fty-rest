@@ -21,7 +21,11 @@
 #include <cassert>
 #include <cxxtools/regex.h>
 #include <unistd.h> // make "readlink" available on ARM
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include <tntdb.h>
+#include <string.h>
 #include "utils_web.h"
 #include "helpers.h"
 #include "str_defs.h" // EV_LICENSE_DIR, EV_DATA_DIR
@@ -432,6 +436,32 @@ get_current_db_initialized_file (void)
         return NULL;
     }
     return current_db_initalized_file;
+}
+
+bool database_ready = false;
+
+// stat /var/run/fty-db-ready and return 1 if it exists
+// or 0 if it does not, or -1 for internal errors.
+// In case of success, also sets the database_ready variable.
+int probe_db_ready_file(void) {
+    /* Check whether database has started and initialized yet */
+    struct stat db_stat;
+    char *database_ready_file = get_current_db_initialized_file();
+    if (!database_ready_file) {
+        log_error("Out of memory!");
+        return -1;
+    }
+
+    log_debug("database_ready_file='%s'", database_ready_file);
+    /* Stat returns 0 on success, so database_ready is inverted value of it. */
+    database_ready = (0 == stat(database_ready_file, &db_stat));
+    if (!database_ready) {
+        log_debug("Database is not ready, stat errno[%d]: %s\n", errno, strerror(errno));
+    }
+    free (database_ready_file); database_ready_file = NULL;
+
+    /* Go on to next module in tntnet.xml */
+    return database_ready;
 }
 
 char*

@@ -78,7 +78,7 @@ bool relative_to_unixtime (const std::string& relative, int64_t now, int64_t& un
 </%pre>
 <%request scope="global">
 UserInfo user;
-bool database_ready;
+//bool database_ready;
 </%request>
 <%cpp>
     // verify server is ready

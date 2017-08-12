@@ -135,7 +135,7 @@ s_rt_encode_GET (const char* name, zuuid_t *uuid)
 </%pre>
 <%request scope="global">
 UserInfo user;
-bool database_ready;
+//bool database_ready;
 </%request>
 <%cpp>
     // verify server is ready

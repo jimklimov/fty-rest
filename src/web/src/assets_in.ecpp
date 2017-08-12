@@ -64,7 +64,7 @@ static std::string
 </%pre>
 <%request scope="global">
 UserInfo user;
-bool database_ready;
+//bool database_ready;
 </%request>
 <%cpp>
 {

@@ -23,34 +23,18 @@
  * \brief Provide information about system status (database ready check)
  */
  #><%pre>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include "utils.h"
 #include "helpers.h"
 #include "log.h"
 </%pre>
-<%request scope="global">
-bool database_ready;
-</%request>
 <%cpp>
 {
     /* Check whether database has started and initialized yet */
-    struct stat db_stat;
-    char *database_ready_file = get_current_db_initialized_file();
-    if (!database_ready_file) {
-        log_error("Out of memory!");
+    int rv = probe_db_ready_file();
+
+    log_info("probe_db_ready_file()...");
+    if (rv < 0) {
         http_die ("internal-error", "Out of memory!");
     }
-    log_debug("database_ready_file='%s'", database_ready_file);
-    /* Stat returns 0 on success, so database_ready is inverted value of it. */
-    database_ready = !stat(database_ready_file, &db_stat);
-    if (!database_ready) {
-        log_debug("Database is not ready, stat errno[%d]: %s\n", errno, strerror(errno));
-    }
-    free (database_ready_file); database_ready_file = NULL;
 
     /* Go on to next module in tntnet.xml */
     return DECLINED;

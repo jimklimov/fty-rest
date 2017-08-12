@@ -35,7 +35,7 @@
 </%pre>
 <%request scope="global">
     UserInfo user;
-    bool database_ready;
+//    bool database_ready;
 </%request>
 <%cpp>
     // Do not verify database because it is expected that in early

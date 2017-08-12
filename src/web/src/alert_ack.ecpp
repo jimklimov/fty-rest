@@ -51,7 +51,7 @@ int state_valid (const char *state) {
 </%pre>
 <%request scope="global">
 UserInfo user;
-bool database_ready;
+//bool database_ready;
 </%request>
 <%cpp>
     // verify server is ready
