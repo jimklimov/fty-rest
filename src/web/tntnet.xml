@@ -8,7 +8,7 @@
   <mappings>
     <!-- Global variables setup regarding server status -->
     <mapping>
-      <target>server_status@tntnet</target>
+      <target>server_status@bios_web</target>
     </mapping>
 
     <!-- Everything SSL only -->
