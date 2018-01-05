@@ -164,6 +164,7 @@ src/web/src/scan_run.cpp
 src/web/src/scan_progress.cpp
 src/web/src/list_gpio.cpp
 src/web/src/add_gpio.cpp
+src/web/src/gpo_action.cpp
 src/web/src/server_status.cpp
 src/web/src/security_headers.cpp
 src/web/src/topology_location_from2.cpp
