@@ -769,12 +769,11 @@ bios_web_la_CPPFLAGS =	$(AM_CPPFLAGS) \
 			-I$(abs_top_srcdir)/src/persist \
 			-I$(abs_top_srcdir)/src/db/assets
 
-# Note: the libmagic we use delivers no pkg-config, so we include it explicitly
 bios_web_la_LDFLAGS = 	${LIBCZMQ_LIBS}	${CXXTOOLS_LIBS} \
 			${LIBSODIUM_LIBS} ${LIBSASL2_LIBS} \
 			${LIBBIOSPROTO_LIBS} \
 			$(LDFLAGS_NO_UNDEFS) \
-			-module -lm ${TNTDB_LIBS} ${TNTNET_LIBS} ${LIBCIDR_LIBS} -lmagic ${LIBMLM_LIBS} ${LIBFTYPROTO_LIBS} -lz
+			-module -lm ${TNTDB_LIBS} ${TNTNET_LIBS} ${LIBCIDR_LIBS} ${LIBMAGIC_LIBS} ${LIBMLM_LIBS} ${LIBFTYPROTO_LIBS} -lz
 
 bios_web_la_LIBADD = \
 			libpriv-utils.la \
