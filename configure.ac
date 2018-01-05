@@ -520,21 +520,28 @@ AS_IF([test -n "$_CC_ORIG"], [
 	AC_MSG_NOTICE([NOTE: Restored default compiler settings: $CC])])
 
 # Checks for the header files
-AC_CHECK_HEADERS([magic.h], [], AC_MSG_ERROR([libmagic: cannot find required header magic.h]))
-AC_CHECK_LIB(
+# Note: the libmagic we use delivers no pkg-config, so we include it explicitly
+# if needed
+PKG_CHECK_MODULES([LIBMAGIC], [libmagic >= 5.18], [], [
+    AC_MSG_WARN([cannot find libmagic library >= 5.18 via pkg-config])
+    AC_CHECK_HEADERS([magic.h], [], AC_MSG_ERROR([libmagic: cannot find required header magic.h]))
+    AC_CHECK_LIB(
              [magic],
              [magic_open],
              [],
              [AC_MSG_ERROR([function magic_open() is not available, this is not the libmagic we are looking for])]
              )
-SAVE_LIBS="$LIBS"
-LIBS="$LIBS -lmagic"
-AC_MSG_CHECKING([linkability with libmagic])
-AC_TRY_LINK([#include <magic.h>], [magic_t magic_cookie = magic_open(MAGIC_NONE); if (!magic_cookie) {;}; magic_close(magic_cookie);],
+    SAVE_LIBS="$LIBS"
+    LIBS="$LIBS -lmagic"
+    AC_MSG_CHECKING([linkability with libmagic])
+    AC_TRY_LINK([#include <magic.h>], [magic_t magic_cookie = magic_open(MAGIC_NONE); if (!magic_cookie) {;}; magic_close(magic_cookie);],
              [AC_MSG_RESULT([ok])],
              [AC_MSG_ERROR([function magic_open() is not available, this is not the libmagic we are looking for])]
              )
-LIBS="$SAVE_LIBS"
+    LIBS="$SAVE_LIBS"
+    LIBMAGIC_LIBS="-lmagic"
+    AC_SUBST(LIBMAGIC_LIBS)
+])
 
 AC_LANG_PUSH([C++])
 AC_CHECK_HEADERS([tntdb.h],
