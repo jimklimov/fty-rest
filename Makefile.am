@@ -399,7 +399,7 @@ test_web_helpers_SOURCES = 	tests/web/src/test-helpers.cc \
 							src/web/src/helpers.cc
 
 test_web_helpers_LDADD =    libpriv-test-run.la \
-				            libpriv-utils.la
+							libpriv-utils.la
 
 test_web_helpers_CPPFLAGS =	$(AM_CPPFLAGS) \
 							-I$(abs_top_srcdir)/tests/include/
