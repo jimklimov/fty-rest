@@ -518,6 +518,15 @@ if [ "$BUILD_TYPE" == "default" ] || [ "$BUILD_TYPE" == "default-Werror" ] || [ 
     echo ""
     echo "=== LIBCIDR.PC"
     cat "${BUILD_PREFIX}"/lib/pkgconfig/libcidr.pc || true
+    echo ""
+    echo "=== LIBMAGIC.PC"
+    cat "${BUILD_PREFIX}"/lib/pkgconfig/libmagic.pc || true
+    echo ""
+    echo "=== TNTNET.PC"
+    cat "${BUILD_PREFIX}"/lib/pkgconfig/tntnet.pc || true
+    echo ""
+    echo "=== TNTDB.PC"
+    cat "${BUILD_PREFIX}"/lib/pkgconfig/tntdb.pc || true
     echo "`date`: INFO: Starting build of currently tested project..."
     CCACHE_BASEDIR=${PWD}
     export CCACHE_BASEDIR
