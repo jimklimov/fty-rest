@@ -180,7 +180,10 @@ install-exec-hook:
 	    mv -f `ls -1A | egrep -v '^'"$(PACKAGE)"'$$' ` $(PACKAGE)/
 	mkdir -p $(DESTDIR)$(clientdir) && \
 	    mv -f $(DESTDIR)$(bindir)/warranty-metric $(DESTDIR)$(clientdir)/
-	mv -f $(DESTDIR)$(mandir)/man1/warranty/warranty-metric.1 $(DESTDIR)$(mandir)/man1/
+if INSTALL_MAN
+	cd $(builddir)/doc && $(MAKE) install
+	mv -f $(DESTDIR)$(mandir)/man1/warranty/warranty-metric.1 $(DESTDIR)$(mandir)/man1/ || true
+endif
 
 ### This file contains the TNTNET settings relevant for our test runs
 ### Note: in non-daemon mode, stderr is logged to stderr
