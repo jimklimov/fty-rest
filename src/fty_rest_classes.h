@@ -79,10 +79,6 @@ typedef struct _persist_persist_error_t persist_persist_error_t;
 typedef struct _shared_magic_t shared_magic_t;
 #define SHARED_MAGIC_T_DEFINED
 #endif
-#ifndef WARRANTY_WARRANTY_METRIC_T_DEFINED
-typedef struct _warranty_warranty_metric_t warranty_warranty_metric_t;
-#define WARRANTY_WARRANTY_METRIC_T_DEFINED
-#endif
 #ifndef WEB_SRC_ADD_GPIO_T_DEFINED
 typedef struct _web_src_add_gpio_t web_src_add_gpio_t;
 #define WEB_SRC_ADD_GPIO_T_DEFINED
@@ -325,7 +321,6 @@ typedef struct _web_src_hw_capability_t web_src_hw_capability_t;
 #include "persist/monitor.h"
 #include "persist/persist_error.h"
 #include "shared/magic.h"
-#include "warranty/warranty_metric.h"
 #include "web/src/add_gpio.h"
 #include "web/src/admin_iface.h"
 #include "web/src/admin_ifaces.h"

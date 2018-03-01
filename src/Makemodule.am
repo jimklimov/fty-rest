@@ -24,7 +24,6 @@ src_libfty_rest_la_SOURCES = \
     src/persist/monitor.cc \
     src/persist/persist_error.cc \
     src/shared/magic.cc \
-    src/warranty/warranty_metric.cc \
     src/web/src/add_gpio.cc \
     src/web/src/admin_iface.cc \
     src/web/src/admin_ifaces.cc \
@@ -150,6 +149,13 @@ endif
 
 src_libfty_rest_la_LIBADD = ${project_libs}
 
+if ENABLE_WARRANTY_WARRANTY_METRIC
+bin_PROGRAMS += src/warranty/warranty-metric
+src_warranty_warranty_metric_CPPFLAGS = ${AM_CPPFLAGS}
+src_warranty_warranty_metric_LDADD = ${program_libs}
+src_warranty_warranty_metric_SOURCES = src/warranty/warranty-metric.cc
+endif #ENABLE_WARRANTY_WARRANTY_METRIC
+
 if ENABLE_FTY_REST_SELFTEST
 check_PROGRAMS += src/fty_rest_selftest
 noinst_PROGRAMS += src/fty_rest_selftest
@@ -160,6 +166,7 @@ endif #ENABLE_FTY_REST_SELFTEST
 
 # define custom target for all products of /src
 src: \
+		src/warranty/warranty-metric \
 		src/fty_rest_selftest \
 		src/libfty_rest.la
 

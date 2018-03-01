@@ -74,7 +74,6 @@ EXTRA_DIST += \
     src/persist/monitor.h \
     src/persist/persist_error.h \
     src/shared/magic.h \
-    src/warranty/warranty_metric.h \
     src/web/src/add_gpio.h \
     src/web/src/admin_iface.h \
     src/web/src/admin_ifaces.h \

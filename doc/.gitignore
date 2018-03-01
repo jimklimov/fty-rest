@@ -81,6 +81,8 @@ web_src_tokens.txt
 web_src_tokens.doc
 web_src_sse.txt
 web_src_sse.doc
+warranty/warranty-metric.txt
+warranty/warranty-metric.doc
 
 # Make sure to track the manually maintained project description
 !*.adoc

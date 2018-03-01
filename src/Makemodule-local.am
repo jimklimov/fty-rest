@@ -168,6 +168,7 @@ uninstall-local: uninstall-tntnet-nonshared uninstall-tntnet-includes
 	/bin/rm -f $(DESTDIR)$(TNTLIB_DIRNAME)/$(TNTLIB_BASENAME).so*
 
 # Install the built shared objects for tntnet
+# Override the hoops zproject does with subdir support (warranty-metric)
 install-exec-hook:
 	mkdir -p $(DESTDIR)$(TNTLIB_DIRNAME) && \
 	    mv -f $(DESTDIR)$(libdir)/$(TNTLIB_BASENAME).so.* $(DESTDIR)$(TNTLIB_DIRNAME)
@@ -177,6 +178,9 @@ install-exec-hook:
 	mkdir -p $(DESTDIR)$(includedir)/$(PACKAGE) && \
 	    cd $(DESTDIR)$(includedir) && \
 	    mv -f `ls -1A | egrep -v '^'"$(PACKAGE)"'$$' ` $(PACKAGE)/
+	mkdir -p $(DESTDIR)$(clientdir) && \
+	    mv -f $(DESTDIR)$(bindir)/warranty-metric $(DESTDIR)$(clientdir)/
+	mv -f $(DESTDIR)$(mandir)/man1/warranty/warranty-metric.1 $(DESTDIR)$(mandir)/man1/
 
 ### This file contains the TNTNET settings relevant for our test runs
 ### Note: in non-daemon mode, stderr is logged to stderr

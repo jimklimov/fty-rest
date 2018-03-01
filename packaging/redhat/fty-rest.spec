@@ -137,7 +137,8 @@ This package contains binary programs that go along with fty-rest.
 %files -n fty-rest-clients
 %defattr(-,root,root)
 ### TODO : Makefile, install and uncomment
-#%{_libexecdir}/warranty-metric
+%{_bindir}/warranty/warranty-metric
+%{_mandir}/man1/warranty/warranty-metric*
 #%{_libexecdir}/bios-csv
 
 %package -n fty-rest

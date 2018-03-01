@@ -1262,6 +1262,16 @@ fi
      AC_MSG_RESULT([$enable_dist_cmakefiles])])
 AM_CONDITIONAL(ENABLE_DIST_CMAKEFILES, test "x$enable_dist_cmakefiles" = "xyes")
 
+# Check for warranty/warranty-metric intent
+AC_ARG_ENABLE([warranty/warranty-metric],
+    AS_HELP_STRING([--enable-warranty/warranty-metric],
+        [Compile and install 'warranty/warranty-metric' [default=yes]]),
+    [enable_warranty_warranty_metric=$enableval],
+    [enable_warranty_warranty_metric=yes])
+
+AM_CONDITIONAL([ENABLE_WARRANTY_WARRANTY_METRIC], [test x$enable_warranty_warranty_metric != xno])
+AM_COND_IF([ENABLE_WARRANTY_WARRANTY_METRIC], [AC_MSG_NOTICE([ENABLE_WARRANTY_WARRANTY_METRIC defined])])
+
 # Check for fty_rest_selftest intent
 AC_ARG_ENABLE([fty_rest_selftest],
     AS_HELP_STRING([--enable-fty_rest_selftest],

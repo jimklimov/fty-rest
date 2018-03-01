@@ -6,7 +6,7 @@
 all-local: doc
 
 # Public programs ("main" tags in project.xml), auto-regenerated:
-MAN1 =
+MAN1 = warranty/warranty-metric.1
 # Public classes ("class" tags in project.xml), auto-regenerated:
 MAN3 = db_topology2.3 db_assets_assetcr.3 db_assets_assetd.3 db_assets_assetr.3 db_assets_assetu.3 git_details_override.3 msg_asset_msg.3 msg_common_msg.3 shared_asset_types.3 shared_augtool.3 shared_cidr.3 shared_configure_inform.3 shared_csv.3 shared_data.3 shared_dbpath.3 shared_filesystem.3 shared_fty_asset_uptime_configurator.3 shared_ic.3 shared_log.3 shared_str_defs.3 shared_subprocess.3 shared_tntmlm.3 shared_topic_cache.3 shared_upsstatus.3 shared_utils.3 shared_utilspp.3 shared_utils_web.3 shared_utils_json.3 web_src_asset_computed_impl.3 web_src_helpers.3 web_src_iface.3 web_src_location_helpers.3 web_src_sasl.3 web_src_tokens.3 web_src_sse.3
 # Project overview, written by a human after initial skeleton:
@@ -203,6 +203,12 @@ web_src_tokens.txt: $(top_srcdir)/src/web/src/tokens.cc
 GENERATED_DOCS += web_src_sse.txt web_src_sse.doc
 web_src_sse.txt: $(top_srcdir)/src/web/src/sse.cc
 	"$(srcdir)/mkman" "web/src/sse" "$(builddir)/web_src_sse.txt" "$(srcdir)/.."
+
+# Note: customized (mkdir)
+GENERATED_DOCS += warranty/warranty-metric.txt warranty/warranty-metric.doc
+warranty/warranty-metric.txt: $(top_srcdir)/src/warranty/warranty-metric.cc
+	mkdir -p "$(builddir)/warranty"
+	"$(srcdir)/mkman" "warranty/warranty-metric" "$(builddir)/warranty/warranty-metric.txt" "$(srcdir)/.."
 
 
 clean-local:
