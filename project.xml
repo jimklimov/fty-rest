@@ -87,15 +87,16 @@
         debian_name="libsasl2-dev"
         redhat_name="cyrus-sasl-devel"
     />
-    
+<!--        redhat_name="(libsasl2-devel or cyrus-sasl-devel)" -->
+
     <use project = "fty-common" libname = "libfty_common" header="fty_common.h"
         repository = "https://github.com/42ity/fty-common.git"
         test = "fty_commmon_selftest" >
         <use project = "log4cplus" header = "log4cplus/logger.h"
-        test = "appender_test" release="REL_1_1_2" repository="https://github.com/log4cplus/log4cplus.git" />
+            test = "appender_test"
+            release="1.1.2-FTY-master"
+            repository="https://github.com/42ity/log4cplus.git" />
     </use>
-
-<!--        redhat_name="(libsasl2-devel or cyrus-sasl-devel)" -->
 
     <header name = "app"  />
     <header name = "bios_agent"  />
