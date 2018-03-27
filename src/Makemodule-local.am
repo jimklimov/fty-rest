@@ -9,7 +9,7 @@ clientdir ?= $(libexecdir)/$(PACKAGE)
 #     defined in condition ENABLE_DB_BIOS_CSV, which is included in
 #     condition TRUE ...
 #   src/Makemodule.am:146: ... 'src_db_bios_csv_LDADD' previously defined here
-src_db_bios_csv_LDADD := ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${cidr_LIBS} ${cxxtools_LIBS} ${tntdb_LIBS} ${magic_LIBS} ${fty_proto_LIBS} ${libsasl2_LIBS} ${log4cplus_LIBS} ${fty_common_LIBS}
+override src_db_bios_csv_LDADD := ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${cidr_LIBS} ${cxxtools_LIBS} ${tntdb_LIBS} ${magic_LIBS} ${fty_proto_LIBS} ${libsasl2_LIBS} ${log4cplus_LIBS} ${fty_common_LIBS}
 
 # Statically link bios-csv with everything needed
 if ENABLE_DB_BIOS_CSV
