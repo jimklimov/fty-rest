@@ -24,6 +24,7 @@ configure
 !configure.ac
 .deps
 .git_details
+.git_details-fty-rest
 .git_details.tmp
 src/git_details_override.cc
 include/git_details_override.h
