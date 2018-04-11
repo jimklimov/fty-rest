@@ -56,6 +56,10 @@ pipeline {
             defaultValue: true,
             description: 'Attempt build with DRAFT API in this run?',
             name: 'DO_BUILD_WITH_DRAFT_API')
+        choice (
+            choices: 'auto\nyes\nno',
+            description: 'Enable pedantic compiler options for common builds (auto turns into yes for GCC builds)?',
+            name: 'ENABLE_WERROR')
         booleanParam (
             defaultValue: true,
             description: 'Attempt a build with docs in this run? (Note: corresponding tools are required in the build environment)',
@@ -144,7 +148,7 @@ pipeline {
                       dir("tmp/build-withDRAFT") {
                         deleteDir()
                         unstash 'prepped'
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=yes --with-docs=no'
+                        sh """CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=yes --enable-Werror="${params.ENABLE_WERROR}" --with-docs=no"""
                         sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make -k -j4 || make'
                         sh """ echo "Are GitIgnores good after make with drafts?"; make CI_REQUIRE_GOOD_GITIGNORE="${params.CI_REQUIRE_GOOD_GITIGNORE}" check-gitignore """
                         stash (name: 'built-draft', includes: '**/*', excludes: '**/cppcheck.xml')
@@ -162,7 +166,7 @@ pipeline {
                       dir("tmp/build-withoutDRAFT") {
                         deleteDir()
                         unstash 'prepped'
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --with-docs=no'
+                        sh """CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --enable-Werror="${params.ENABLE_WERROR}" --with-docs=no"""
                         sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make -k -j4 || make'
                         sh """ echo "Are GitIgnores good after make without drafts?"; make CI_REQUIRE_GOOD_GITIGNORE="${params.CI_REQUIRE_GOOD_GITIGNORE}" check-gitignore """
                         stash (name: 'built-nondraft', includes: '**/*', excludes: '**/cppcheck.xml')
@@ -180,7 +184,7 @@ pipeline {
                       dir("tmp/build-DOCS") {
                         deleteDir()
                         unstash 'prepped'
-                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=yes --with-docs=yes'
+                        sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=yes --with-docs=yes --enable-Werror=no'
                         script {
                             if ( params.DO_DIST_DOCS ) {
                                 sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make dist-gzip || exit ; DISTFILE="`ls -1tc *.tar.gz | head -1`" && [ -n "$DISTFILE" ] && [ -s "$DISTFILE" ] || exit ; mv -f "$DISTFILE" __dist.tar.gz'
@@ -222,7 +226,7 @@ pipeline {
                                     unstash 'built-docs'
                                 } else {
                                     unstash 'prepped'
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --with-docs=no'
+                                    sh """CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --enable-Werror="${params.ENABLE_WERROR}" --with-docs=no"""
                                 }
                             }
                             sh 'rm -f cppcheck.xml'
@@ -257,7 +261,7 @@ pipeline {
                                     unstash 'built-docs'
                                 } else {
                                     unstash 'prepped'
-                                    sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --with-docs=no'
+                                    sh """CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; ./configure --enable-drafts=no --enable-Werror="${params.ENABLE_WERROR}" --with-docs=no"""
                                 }
                             }
                             sh 'CCACHE_BASEDIR="`pwd`" ; export CCACHE_BASEDIR; make clang-format-check-CI'
