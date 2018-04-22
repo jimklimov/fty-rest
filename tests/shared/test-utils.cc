@@ -30,7 +30,13 @@
 #include <fty_common.h>
 
 #include "defs.h"
-#include "utils.h"
+#include "shared/utils.h"
+
+// Note: Tests here do bad things on purpose
+// Do not let vigilant compilers complain :)
+#ifdef __GNUC__
+# pragma GCC diagnostic ignored "-Woverflow"
+#endif
 
 TEST_CASE ("average_step_seconds", "[average_step_seconds][utils][average]") {
 

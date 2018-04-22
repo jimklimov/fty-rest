@@ -131,10 +131,9 @@ default|default-Werror|default-with-docs|valgrind|clang-format-check)
     fi
 
 # Customized just in case to cover all our ARCHes
-#    CONFIG_OPTS+=("--with-pkgconfigdir=${BUILD_PREFIX}/lib/pkgconfig")
-#    CONFIG_OPTS+=("--with-systemdtmpfilesdir=${BUILD_PREFIX}/usr/lib/tmpfiles.d")
-#    CONFIG_OPTS+=("--with-systemdsystempresetdir=${BUILD_PREFIX}/usr/lib/systemd/system-preset")
-#    CONFIG_OPTS+=("--with-systemdsystemunitdir=${BUILD_PREFIX}/usr/lib/systemd/system")
+    CONFIG_OPTS+=("--with-systemdtmpfilesdir=${BUILD_PREFIX}/usr/lib/tmpfiles.d")
+    CONFIG_OPTS+=("--with-systemdsystempresetdir=${BUILD_PREFIX}/usr/lib/systemd/system-preset")
+    CONFIG_OPTS+=("--with-systemdsystemunitdir=${BUILD_PREFIX}/usr/lib/systemd/system")
 
 #    # fty-rest itself has no notion of drafts, and from Z ecosystem we want stable APIs
 #    CONFIG_OPTS+=("--enable-drafts=no")
@@ -460,7 +459,8 @@ default|default-Werror|default-with-docs|valgrind|clang-format-check)
             $CI_TIME autoconf || \
             $CI_TIME autoreconf -fiv
         fi
-        $CI_TIME ./configure "${CONFIG_OPTS[@]}"
+# Note: customized config opts for tntdb
+        $CI_TIME ./configure "${CONFIG_OPTS[@]}" --without-postgresql --without-sqlite
         $CI_TIME make -j4
         $CI_TIME make install
         cd "${BASE_PWD}"

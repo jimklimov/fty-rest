@@ -38,9 +38,9 @@
 
 #include <fty_proto.h>
 
-#include "csv.h"
-#include "db/inout.h"
-#include "tntmlm.h"
+#include "shared/csv.h"
+#include "src/db/inout.h"
+#include "shared/tntmlm.h"
 using namespace shared;
 
 TEST_CASE("CSV map basic get test", "[csv]") {

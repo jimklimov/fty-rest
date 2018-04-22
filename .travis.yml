@@ -3,7 +3,7 @@
 # You can add hand-written code here.
 
 language:
-- c
+- cpp
 
 cache:
 - ccache
@@ -16,8 +16,10 @@ os:
 # in the default container with sudo==false, consider requiring a docker
 # image and/or a newer Ubuntu Trusty baseline VM, by uncommenting below.
 # See the current docs on http://travis-ci.org for up-to-date options.
-sudo: false
-#sudo: required
+# The "sudo" in fixsasl script may require this enabled, depending on
+# distro and package versions.
+#sudo: false
+sudo: required
 
 dist:
 - trusty

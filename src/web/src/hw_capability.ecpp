@@ -39,46 +39,49 @@ req_hw_cap (zuuid_t *uuid, const char *type)
 }
 
 void
-build_json (std::string &output, std::string &gpi_count, std::string &gpo_count)
+build_json (std::string &output, const std::string &hw_type,
+		const std::string &gpi_count, const std::string &gpo_count)
 {
     output.clear();
     output = "{\n";
+    output += utils::json::jsonify("type", hw_type) + ",\n";
     output += utils::json::jsonify("gpi", gpi_count) + ",\n";
     output += utils::json::jsonify("gpo", gpo_count) + "\n";
     output += "}";
 }
 
-// get GPIO ports counts
+// get a given HW capability from fty-info
 int
-get_hw_capability (const char *type, std::string &count)
+get_hw_capability (const char *type, std::string &res, const char*& errstr)
 {
     // connect to mlm client
     MlmClientPool::Ptr client = mlm_pool.get ();
     if (!client.getPointer ())
     {
+        errstr = "mlm_pool.get () failed.";
         log_fatal ("hw_capability: mlm_pool.get () failed.");
         return -1;
     }
 
     zuuid_t *uuid = zuuid_new ();
     zmsg_t *send = req_hw_cap (uuid, type);
-    int rv = client->sendto ("fty-info", "hwcapabaility", 1000, &send);
-
-    if (rv == -1)
+    if (client->sendto ("fty-info", "hwcapabaility", 1000, &send) < 0)
     {
+        errstr = "client->sendto () failed.";
         log_fatal ("hw_capability: client->sendto (address = '%s') failed.", "fty-info");
         zmsg_destroy (&send);
         zuuid_destroy (&uuid);
-        return -2;
+        return -1;
     }
 
     zmsg_t *resp = client->recv (zuuid_str_canonical (uuid), 5);
     zuuid_destroy (&uuid);
     if (!resp)
     {
+        errstr = "client->recv () failed.";
         log_fatal ("hw_capability: client->recv (timeout = '5') returned NULL");
         zmsg_destroy (&resp);
-        return -3;
+        return -1;
     }
     char *result = zmsg_popstr (resp);
     if (streq (result, "OK")) {
@@ -86,19 +89,23 @@ get_hw_capability (const char *type, std::string &count)
         char *resp_type = zmsg_popstr (resp);
         if (streq(resp_type, type)) {
             zstr_free (&resp_type);
-            count = zmsg_popstr (resp);
+            res = zmsg_popstr (resp);
             zmsg_destroy (&resp);
         }
         else {
             zstr_free (&resp_type);
             zmsg_destroy (&resp);
-            return -5;
+            errstr = "unexpected response from fty-info.";
+            log_fatal ("hw_capability: unexpected response from fty-info");
+            return -1;
         }
     }
     else {
         zstr_free (&result);
         zmsg_destroy (&resp);
-        return -4; 
+        errstr = "ERROR response from fty-info.";
+        log_fatal ("hw_capability: ERROR response from fty-info.");
+        return -1;
     }
     return 0;
 }
@@ -121,40 +128,14 @@ UserInfo user;
     if (id != "rackcontroller-0")
         http_die ("request-param-bad", "id", id.c_str (), "not supported");
 
-    std::string output, gpi_count, gpo_count;
-    int rv = get_hw_capability ("gpi", gpi_count);
-    if (rv == -1)
-        http_die ("internal-error", "mlmpool.get () failed.");
-    else
-    if (rv == -2)
-        http_die ("internal-error", "client->sendto () failed.");
-    else
-    if (rv == -3)
-        http_die ("internal-error", "client->recv () failed.");
-    else
-    if (rv == -4)
-        http_die ("internal-error", "ERROR response from fty-info.");
-    else
-    if (rv == -5)
-        http_die ("internal-error", "unexpected response from fty-info.");
-    else {
-        rv = get_hw_capability ("gpo", gpo_count);
-        if (rv == -1)
-            http_die ("internal-error", "mlmpool.get () failed.");
-        else
-        if (rv == -2)
-            http_die ("internal-error", "client->sendto () failed.");
-        else
-        if (rv == -3)
-            http_die ("internal-error", "client->recv () failed.");
-        else
-        if (rv == -4)
-            http_die ("internal-error", "ERROR response from fty-info.");
-        else
-        if (rv == -5)
-            http_die ("internal-error", "unexpected response from fty-info.");
-        else
-            build_json (output, gpi_count, gpo_count);
-    }
+    std::string output, hw_type, gpi_count, gpo_count;
+    const char *errstr = "unspecified error";
+    if (get_hw_capability ("type", hw_type, errstr) < 0)
+        http_die ("internal-error", errstr);
+    if (get_hw_capability ("gpi", gpi_count, errstr) < 0)
+        http_die ("internal-error", errstr);
+    if (get_hw_capability ("gpo", gpo_count, errstr) < 0)
+        http_die ("internal-error", errstr);
+    build_json (output, hw_type, gpi_count, gpo_count);
 </%cpp>
 <$$ output $>

@@ -21,7 +21,7 @@
 #include <string>
 #include <limits.h>
 
-#include "tntmlm.h"
+#include "shared/tntmlm.h"
 
 TEST_CASE ("tntmlm1", "[tntmlm]")
 {

@@ -45,6 +45,10 @@ BuildRequires:  automake
 BuildRequires:  autoconf
 BuildRequires:  libtool
 BuildRequires:  pkgconfig
+# Note: customized dependency added - systemd
+BuildRequires:  systemd-devel
+BuildRequires:  systemd
+%{?systemd_requires}
 BuildRequires:  xmlto
 BuildRequires:  gcc-c++
 BuildRequires:  libsodium-devel
@@ -136,11 +140,26 @@ find %{buildroot} -name '*.la' | xargs rm -f
 ###%{_libexecdir}/%{name}/bios-csv
 %{_prefix}/libexec/fty-rest/bios-csv
 %{_mandir}/man1/bios-csv*
-%{_prefix}/lib/%{name}/bios-passwd
-%{_prefix}/lib/%{name}/testpass.sh
 %{_prefix}/libexec/%{name}/bios-passwd
 %{_prefix}/libexec/%{name}/testpass.sh
-%{_datadir}/%{name}/.git_details
+#%{_datadir}/%{name}/.git_details-fty-rest
+%{_datadir}/bios/.git_details-fty-rest
 %{_datadir}/%{name}/examples/tntnet.xml.example
+%if 0%{?suse_version} > 0
+# The validator is pickier in OpenSUSE build targets
+%dir %{_libdir}
+%dir %{_libdir}/%{name}
+%dir %{_libexecdir}
+%dir %{_prefix}/libexec
+%dir %{_prefix}/libexec/%{name}
+%dir %{_datadir}
+%dir %{_datadir}/bios
+%dir %{_datadir}/%{name}
+%dir %{_datadir}/%{name}/examples
+# Symlinks on some distro layouts
+%dir %{_prefix}/lib/%{name}
+%{_prefix}/lib/%{name}/bios-passwd
+%{_prefix}/lib/%{name}/testpass.sh
+%endif
 
 %changelog

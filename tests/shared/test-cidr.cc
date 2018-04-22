@@ -25,7 +25,8 @@
  * \brief Not yet documented file
  */
 #include <catch.hpp>
-#include <cidr.h>
+#include <shared/cidr.h>
+#include <string.h>
 
 using namespace shared;
 
@@ -47,14 +48,15 @@ TEST_CASE("CIDR Operators","[cidr][operators]") {
   struct in_addr a = { 0x0200007F }; // ugly, this can fail on big-endian machine
   REQUIRE( CIDRAddress(&a) == "127.0.0.2" );
   REQUIRE( CIDRAddress(&a).prefix() == 32 );
-  struct sockaddr_in6 a6 = {
-      .sin6_family = AF_INET6,
-      .sin6_port = 0,
-      .sin6_flowinfo = 0,
-      .sin6_addr = { '\x00','\x00','\x00','\x00','\x00','\x00','\x00','\x00',
-                     '\x00','\x00','\x00','\x00','\x00','\x00','\x00','\x42' },
-      .sin6_scope_id = 0
-  };
+  struct sockaddr_in6 a6 ;
+      memset( &a6, 0, sizeof(a6) );
+      a6.sin6_family = AF_INET6;
+      a6.sin6_port = 0;
+      a6.sin6_flowinfo = 0;
+      a6.sin6_addr = { '\x00','\x00','\x00','\x00','\x00','\x00','\x00','\x00',
+                     '\x00','\x00','\x00','\x00','\x00','\x00','\x00','\x42' };
+      a6.sin6_scope_id = 0;
+
   REQUIRE( CIDRAddress( (struct sockaddr *)&a6 ) == "::42" );
   REQUIRE( CIDRAddress( "1.1.1.1/255.255.255.0" ).valid() );
   REQUIRE( ! CIDRAddress( "1.1.1.1/255.255.255.1" ).valid() );

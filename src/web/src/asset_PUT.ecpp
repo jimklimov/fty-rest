@@ -57,14 +57,26 @@ bool database_ready;
 
     // Read json, transform to csv, use existing functionality
     cxxtools::SerializationInfo si;
+    bool send_inactive = false;
     // read json a deserialize it
     try {
         std::stringstream input (request.getBody (), std::ios_base::in);
         cxxtools::JsonDeserializer deserializer (input);
         deserializer.deserialize (si);
+
         auto si_id = si.findMember("id");
+        std::string status;
+        si.getMember("status") >>= status;
+
         if ( si_id == NULL ) {
             si.addMember("id") <<= id;
+        }
+        else if (status  == "nonactive") {
+            if (id == "rackcontroller-0") {
+                log_debug ("Element %s cannot be inactivated.", si_id);
+                http_die ("action-forbidden", "Setting status of rackcontroller-0");
+            }
+            send_inactive = true;
         }
         else {
             si_id->setValue(id);
@@ -74,6 +86,7 @@ bool database_ready;
         LOG_END_ABNORMAL(e);
         http_die("bad-request-document", e.what());
     }
+
     shared::CsvMap cm;
     try{
         cm = shared::CsvMap_from_serialization_info(si);
@@ -118,6 +131,21 @@ bool database_ready;
         // this code can be executed in multiple threads -> agent's name should
         // be unique at the every moment
         std::string agent_name = utils::generate_mlm_client_id("web.asset_put");
+
+        // if asset is inactive send DELETE asset message to let everybody know that
+        // we don't want to monitor it
+        try {
+            if (send_inactive) {
+                send_configure (row.first, persist::asset_operation::DELETE, agent_name);
+                return HTTP_OK;
+            }
+        }
+        catch (const std::runtime_error &e) {
+            log_error ("%s", e.what());
+            std::string msg = "Error during sending DELETE for inactive asset. Consult system log.";
+            http_die("internal-error", msg.c_str());
+        }
+
         try{
             send_configure (row.first, row.second, agent_name);
         }

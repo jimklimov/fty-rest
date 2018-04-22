@@ -25,6 +25,7 @@
  */
 #include <catch.hpp>
 #include <fty_common.h>
+#include "preproc.h"
 
 TEST_CASE ("unicode related stuff", "[helpers]") {
 
@@ -62,7 +63,7 @@ TEST_CASE ("check_element_identifier", "[helpers]") {
     http_errors_t errors;
     std::string value;
     bool res;
-    uint32_t element_id;
+    uint32_t UNUSED_PARAM element_id;
 
     SECTION ("text check") {
         errors.errors.clear (); value = "This-is_valid01.rule"; element_id = 0; res = false;

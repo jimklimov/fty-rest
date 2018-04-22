@@ -4,4 +4,7 @@ usr/libexec/fty-rest/testpass.sh
 usr/lib/*/fty-rest/bios-passwd
 usr/lib/*/fty-rest/testpass.sh
 usr/share/fty-rest/examples/tntnet.xml.example
-#usr/share/fty-rest/.git_details
+### Note: the legacy location for these git-details files is under
+### /usr/share/bios (renamed into /usr/share/fty by preinstall script)
+#usr/share/fty-rest/.git_details-fty-rest
+usr/share/bios/.git_details-fty-rest

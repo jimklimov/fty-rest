@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2015 Eaton
+ * Copyright (C) 2015-2018 Eaton
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 #include <czmq.h>       // sadly, but zclock_mono is way simpler than std::chrono ...
 #include <iostream>
 
-#include "subprocess.h"
+#include "shared/subprocess.h"
 
 using namespace shared;
 
@@ -96,16 +96,19 @@ TEST_CASE("subprocess-read-stderr", "[subprocess][fd]") {
     std::vector<std::string> argv{"/usr/bin/printf"};
     char buf[1023];
     int ret;
+    ssize_t rv;
     bool bret;
 
     SubProcess proc(argv, SubProcess::STDERR_PIPE);
     bret = proc.run();
     CHECK(bret);
     ret = proc.wait();
-    
+
     //something on stderr
     memset((void*) buf, '\0', 1023);
-    read(proc.getStderr(), (void*) buf, 1023);
+    rv = read(proc.getStderr(), (void*) buf, 1023);
+    CHECK(rv >= 0);
+    CHECK(rv == strlen(buf));
     CHECK(strlen(buf) > 42);
 
     //nothing on stdout
@@ -121,6 +124,7 @@ TEST_CASE("subprocess-read-stdout", "[subprocess][fd]") {
     std::vector<std::string> argv{"/usr/bin/printf", "the-test\n"};
     char buf[1023];
     int ret;
+    ssize_t rv;
     bool bret;
 
     SubProcess proc(argv, SubProcess::STDOUT_PIPE);
@@ -136,7 +140,9 @@ TEST_CASE("subprocess-read-stdout", "[subprocess][fd]") {
 
     //something on stdout
     memset((void*) buf, '\0', 1023);
-    read(proc.getStdout(), (void*) buf, 1023);
+    rv = read(proc.getStdout(), (void*) buf, 1023);
+    CHECK(rv >= 0);
+    CHECK(rv == strlen(buf));
     CHECK(strlen(buf) == 9);
 
     CHECK(ret == 0);
@@ -147,6 +153,7 @@ TEST_CASE("subprocess-write-stdin", "[subprocess][fd]") {
     const char ibuf[] = "hello, world";
     char buf[1023];
     int ret;
+    ssize_t rv;
     bool bret;
 
     SubProcess proc(argv, SubProcess::STDIN_PIPE | SubProcess::STDOUT_PIPE);
@@ -155,8 +162,8 @@ TEST_CASE("subprocess-write-stdin", "[subprocess][fd]") {
     // as we don't close stdin/stdout/stderr, new fd must be at least > 2
     CHECK(proc.getStdin() > STDERR_FILENO);
 
-    ret = ::write(proc.getStdin(), (const void*) ibuf, strlen(ibuf));
-    CHECK(ret == strlen(ibuf));
+    rv = ::write(proc.getStdin(), (const void*) ibuf, strlen(ibuf));
+    CHECK(rv == strlen(ibuf));
     ::close(proc.getStdin());   // end of stream
 
     ret = proc.wait();
@@ -166,7 +173,9 @@ TEST_CASE("subprocess-write-stdin", "[subprocess][fd]") {
 
     //something on stdout
     ::memset((void*) buf, '\0', 1023);
-    ::read(proc.getStdout(), (void*) buf, strlen(ibuf));
+    rv = ::read(proc.getStdout(), (void*) buf, strlen(ibuf));
+    CHECK(rv >= 0);
+    CHECK(rv == strlen(buf));
     CHECK(strlen(buf) == strlen(ibuf));
     CHECK(strcmp(buf, ibuf) == 0);
 

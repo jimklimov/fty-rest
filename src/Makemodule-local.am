@@ -2,6 +2,14 @@
 
 ### No-arch pathnames wanted
 clientdir ?= $(libexecdir)/$(PACKAGE)
+### Autotools insist on having these defined, no "?=" here:
+DISTCLEANDIRS =
+check_LTLIBRARIES =
+### Configure flag for CI runs
+ENABLE_CI_TESTS ?=
+### Note: lower-cased on purpose; the "cibin_PROGRAMS"
+### for a particular run is conditionally defined below
+cibin_programs =
 
 # Do not link bios-csv with libfty_rest or libtntnet
 # Note: ignore the Make warning that
@@ -13,6 +21,9 @@ override src_db_bios_csv_LDADD := ${libzmq_LIBS} ${czmq_LIBS} ${malamute_LIBS} $
 
 # Statically link bios-csv with everything needed
 if ENABLE_DB_BIOS_CSV
+
+### TODO : Use libpriv-util defined below for tests?
+### Or keep this program truly with least possible run-time dependencies?
 src_db_bios_csv_SOURCES += \
 	 src/shared/utils.cc \
 	 include/shared/utils.h \
@@ -255,10 +266,14 @@ src_libfty_rest_la_CPPFLAGS += -I$(abs_top_srcdir)/src
 
 # Just in case we don't have all dependencies properly spelled out,
 # try to ensure that certain files are built early in the process
-all-local: $(abs_top_builddir)/src/git_details_override.cc .git_details .git_details-fty-rest
+all-local: $(abs_top_builddir)/src/git_details_override.cc \
+            .git_details .git_details-fty-rest \
+            src/libfty_rest.la src/db/bios-csv
 
 # Try to build everything buildable, e.g. for further warning counters
-all-buildproducts: all-local all
+all-buildproducts: all-local all web-test-deps \
+            $(check_LTLIBRARIES) $(check_PROGRAMS) $(check_SCRIPTS) \
+            $(cibin_programs_list)
 
 #----------------------------------------------------------------------
 #                        hook for make check custom verifications
@@ -273,16 +288,24 @@ distclean-local:
 # Run compile/link tests defined in this Makefile
 # Note that check-gitignore should be the last target
 # FIXME: "check-pool" temporarily not included into "check-local", see below
-#check-local: check-gitignore
+# TODO POST-ZPROJECTIZATION : This target is defined in the
+#   generated src/Makemodule.am -- make a variable in zproject
+#   for additional targets to list there, or append somehow...
+#check-local: web-link-test
 
 #----------------------------------------------------------------------
 #                       hook for installation legacy-like customization
 #----------------------------------------------------------------------
 
-clean-local:
+clean-junit:
+	/bin/rm -rf $(abs_top_builddir)/tests/junit
+
+clean-ecpp-cc:
 	for file in $(ECPPCCFILES); do \
 	    /bin/rm -f $(top_builddir)/src/$$file; \
 	done
+
+clean-local: clean-junit clean-ecpp-cc
 
 # Technically the implementation of tntnet servlets is a shared library
 # It is not intended for linking by other apps, and needs no static version
@@ -297,24 +320,25 @@ uninstall-tntnet-nonshared:
 	           $(DESTDIR)$(libdir)/$(TNTLIB_BASENAME).la*
 
 uninstall-tntnet-includes:
-	/bin/rm -fr $(DESTDIR)$(includedir)
+	/bin/rm -fr $(DESTDIR)$(includedir)/$(PACKAGE)
 
 uninstall-local: uninstall-tntnet-nonshared uninstall-tntnet-includes
 	/bin/rm -f $(DESTDIR)$(TNTLIB_DIRNAME)/$(TNTLIB_BASENAME).so*
 	/bin/rm -f $(DESTDIR)$(prefix)/libexec/$(PACKAGE)/bios-csv
 
-# Install the built shared objects for tntnet
-install-exec-hook:
+# Install the built shared objects for tntnet using legacy fty-rest locations
+install-exec-hook-tntnet-so:
 	mkdir -p $(DESTDIR)$(TNTLIB_DIRNAME) && \
 	    mv -f $(DESTDIR)$(libdir)/$(TNTLIB_BASENAME).so.* $(DESTDIR)$(TNTLIB_DIRNAME)
 	/bin/rm -f $(DESTDIR)$(TNTLIB_DIRNAME)/$(TNTLIB_BASENAME).so $(DESTDIR)$(libdir)/$(TNTLIB_BASENAME).so
 	cd $(DESTDIR)$(TNTLIB_DIRNAME) && \
 	    ln -fs "`ls -1 $(TNTLIB_BASENAME).so.* | tail -1`" $(TNTLIB_BASENAME).so
-	mkdir -p $(DESTDIR)$(includedir)/$(PACKAGE) && \
-	    cd $(DESTDIR)$(includedir) && \
-	    mv -f `ls -1A | egrep -v '^'"$(PACKAGE)"'$$' ` $(PACKAGE)/
+
+install-exec-hook-bioscsv:
 	mkdir -p "$(DESTDIR)$(prefix)/libexec/$(PACKAGE)" && \
 	    mv -f "$(package_CLIENTS_BIOS_CSV)" "$(DESTDIR)$(prefix)/libexec/$(PACKAGE)/"
+
+install-exec-hook-cihelpers:
 	if test x"$(ci_helperdir)" != x"$(prefix)/libexec/$(PACKAGE)" ; then \
 	    for F in $(ci_helper_SCRIPTS) ; do \
 	        F="`basename "$$F"`"; \
@@ -322,10 +346,12 @@ install-exec-hook:
 	    done ; \
 	fi
 
+install-exec-hook: install-exec-hook-tntnet-so install-exec-hook-bioscsv install-exec-hook-cihelpers
+
 ### This file contains the TNTNET settings relevant for our test runs
 ### Note: in non-daemon mode, stderr is logged to stderr
 tntnet.xml: src/web/tntnet.xml Makefile
-	${SED} -e 's|\(.*\)\(<!--.*<dir>/</dir>.*-->.*\)|\1<dir>$(abs_top_srcdir)/src/web</dir>\n\1<compPath><entry>$(abs_top_builddir)/.libs</entry></compPath>|' $< > $@ || \
+	${SED} -e 's|\(.*\)\(<!--.*<dir>/</dir>.*-->.*\)|\1<dir>$(abs_top_srcdir)/src/web</dir>\n\1<compPath><entry>$(abs_top_builddir)/src/.libs</entry><entry>$(abs_top_builddir)/.libs</entry></compPath>|' $< > $@ || \
 	rm -f $@
 
 ### This file contains the TNTNET settings distributed as an example for users
@@ -348,10 +374,469 @@ dist_noinst_DATA =	tntnet.xml $(top_srcdir)/src/web/tntnet.xml
 CLEANFILES +=		tntnet.xml tntnet.xml.example
 
 #----------------------------------------------------------------------
+#                        In-place tests for developers and CI
+#----------------------------------------------------------------------
+CLEANFILES +=		tests/CI/tntnet.xml
+
+DISTCLEANFILES += \
+		tests/CI/web/log/*.log
+
+DISTCLEANDIRS += \
+		tests/CI/web/log
+
+# Test data are also part of sources to redistribute
+# The COPYING file is symlinked to from the license fixtures
+EXTRA_DIST +=  tests/fixtures COPYING
+
+# How to run tntnet from Makefile
+RUN_TNTNET_ENVFILE = $(abs_top_builddir)/tests/run_tntnet_make.env
+EXTRA_DIST +=  tests/run_tntnet_packaged.env
+CLEANFILES +=  $(RUN_TNTNET_ENVFILE)
+$(RUN_TNTNET_ENVFILE): $(abs_top_builddir)/Makefile
+	mkdir -p "`dirname "$@"`"
+	{   echo '# 100% Generated by 42ity Makefile'; \
+	    echo 'export LICENSE_DIR="$(abs_top_builddir)/tests/fixtures/license"'; \
+	    echo 'export DATADIR_BASE="$(abs_top_builddir)/var"'; \
+	    echo 'export TESTPASS="$(abs_top_builddir)/tools/testpass.sh"'; \
+	    echo 'export PATH="$(abs_top_builddir)/tools:$(abs_top_srcdir)/tools:$(ci_helperdir):$$PATH"'; \
+	    echo 'export NO_SSL="1"'; \
+	    echo '[ -z "$$BIOS_LOG_LEVEL" ] && BIOS_LOG_LEVEL="LOG_DEBUG"'; \
+	    echo 'export BIOS_LOG_LEVEL'; \
+	    echo 'export DATADIR="$$DATADIR_BASE/fty"'; \
+	} > $@
+
+RUN_TNTNET = ( cat "$(RUN_TNTNET_ENVFILE)" || exit; \
+            . "$(RUN_TNTNET_ENVFILE)" || exit; \
+            [ "x${KEEP_LICENSE}" = "xyes" ] || rm -rf "$$DATADIR_BASE"; id; \
+            mkdir -p "$$DATADIR" && ls -la "$$DATADIR" && \
+            [ -d "$$DATADIR" ] && [ -w "$$DATADIR" ] && \
+            ${TNTNET} $(abs_top_builddir)/tntnet.xml )
+
+# Make sure needed files are up-to-date to test web-server for 42ity REST API
+web-test-deps: tntnet.xml src/libfty_rest.la web-link-test
+
+# TODO: the "tools/testpass.sh" should be invoked via TESTPASS envvar used
+# and exported in RUN_TNTNET - but this does not work for bios-passwd :(
+web-test-deps-inst: install-ci_helperSCRIPTS
+
+### Execute the test web-server for $BIOS REST API
+# LD_PRELOAD=/path/to/libasan.so is needed for fair play with external libs,
+# otherwise "new mlm_stuff; throw(exception)" breaks in ASAN as a function
+# without a proper return code-path (un-instrumented delete/free involved).
+# Note that the execution chain below is backslash-concatenated so that we
+# can both set, export and use the LD_PRELOAD value (independent lines are
+# executed as different shell scripts by make). That is why ultimate exec
+# of the tntnet program is done twice in the same manner.
+
+ASAN_TNTNET =
+if ENABLE_ASAN
+### Note: this must end with a command separator (;) if not empty
+ASAN_TNTNET += \
+	LD_PRELOAD="$$LD_PRELOAD `ldd $(abs_top_builddir)/src/.libs/libfty_rest.so | grep libasan | awk '{print $$3}'`" || true; \
+	LD_PRELOAD="$$LD_PRELOAD `ldd $(abs_top_builddir)/src/.libs/libfty_rest.so | grep libtsan | awk '{print $$3}'`" || true; \
+	echo "===== Using LD_PRELOAD='$$LD_PRELOAD' for Address Sanitizer"; \
+	export LD_PRELOAD;
+endif
+
+web-test: $(RUN_TNTNET_ENVFILE) web-test-deps
+	@echo "=== Running target $@ with credentials of this user: "; \
+		id || true; echo ""
+	@$(ASAN_TNTNET) $(RUN_TNTNET)
+
+#----------------------------------------------------------------------
+#                        Common libs for test programs
+#----------------------------------------------------------------------
+noinst_LTLIBRARIES += 		libpriv-utils.la
+
+libpriv_utils_la_SOURCES = 	\
+				src/shared/utils.cc \
+				include/shared/utils.h \
+				include/defs.h \
+				include/shared/utils_json.h \
+				src/shared/utils_json.cc \
+				include/shared/utilspp.h \
+				src/shared/utilspp.cc \
+				include/shared/subprocess.h \
+				src/shared/subprocess.cc \
+				include/shared/augtool.h \
+				src/shared/augtool.cc \
+				include/shared/ic.h \
+				src/shared/ic.cc \
+				include/shared/csv.h \
+				src/shared/csv.cc \
+				include/shared/cidr.h \
+				src/shared/cidr.cc \
+				include/db/types.h \
+				src/persist/assetcrud.cc \
+				src/persist/assetcrud.h \
+				src/persist/assettopology.cc \
+				src/persist/assettopology.h \
+				src/persist/persist_error.cc \
+				src/persist/persist_error.h \
+				src/persist/monitor.cc \
+				src/persist/monitor.h \
+				src/persist/dbhelpers.cc \
+				src/persist/dbhelpers.h \
+				include/db/dbhelpers.h \
+				src/db/agentstate/agentstate.cc \
+				src/db/agentstate/agentstate.h \
+				src/shared/asset_types.cc \
+				include/shared/asset_types.h \
+				include/dbtypes.h \
+				src/shared/topic_cache.cc \
+				include/shared/topic_cache.h \
+				include/db/assets.h \
+				include/db/assets/assetcr.h \
+				include/db/assets/assetr.h \
+				include/db/assets/assetu.h \
+				include/db/assets/assetd.h \
+				include/db/assetdef.h \
+				src/db/assets/assetcr.cc \
+				src/db/assets/assetr.cc \
+				src/db/assets/assetu.cc \
+				src/db/assets/assetd.cc \
+				src/db/inout.h \
+				src/db/inout/importcsv.cc \
+				src/db/inout/exportcsv.cc \
+				src/db/asset_general.cc \
+				src/db/asset_general.h \
+				include/shared/tntmlm.h \
+				src/shared/tntmlm.cc \
+				src/shared/configure_inform.cc \
+				include/shared/configure_inform.h \
+				include/shared/fty_asset_uptime_configurator.h \
+				src/shared/fty_asset_uptime_configurator.cc \
+				src/shared/magic.cc \
+				include/bios_magic.h \
+				src/msg/asset_msg.cc \
+				include/msg/asset_msg.h \
+				src/msg/common_msg.cc \
+				include/msg/common_msg.h \
+				include/db/topology2.h \
+				src/db/topology2.cc
+
+libpriv_utils_la_LDFLAGS = ${cxxtools_LIBS} ${tntdb_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${fty_proto_LIBS} ${log4cplus_LIBS} ${fty_common_LIBS}
+
+libpriv_utils_la_CPPFLAGS =$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/src/persist \
+				-I$(abs_top_srcdir)/src/db
+
+
+# Needed at least for the distcheck (post distribution tests)
+EXTRA_DIST +=		tests/run-test.sh
+LOG_COMPILER =		$(abs_top_srcdir)/tests/run-test.sh
+
+
+#Test case examples:
+#
+#thisTestOnly            Matches the test case called, 'thisTestOnly'
+#"this test only"        Matches the test case called, 'this test only'
+#these*                  Matches all cases starting with 'these'
+#exclude:notThis         Matches all tests except, 'notThis'
+#~notThis                Matches all tests except, 'notThis'
+#~*private*              Matches all tests except those that contain 'private'
+#a* ~ab* abc             Matches all tests that start with 'a', except those that
+#                        start with 'ab', except 'abc', which is included
+#
+#Names within square brackets are interpreted as tags. A series of tags form an AND expression wheras a comma-separated sequence forms an OR expression. e.g.:
+#
+#[one][two],[three]
+# setup using AM_LOG_FLAGS see an example
+# AM_LOG_FLAGS = 				~[db]
+
+check_LTLIBRARIES += 			libpriv-test-run.la
+
+libpriv_test_run_la_SOURCES = \
+				tests/include/catch.hpp \
+				tests/test-run.cc
+
+libpriv_test_run_la_CPPFLAGS = \
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+
+#----------------------------------------------------------------------
+#                        Unit test binaries
+#----------------------------------------------------------------------
+
+###
+check_PROGRAMS += test-web-helpers
+
+test_web_helpers_SOURCES = \
+				tests/web/src/test-helpers.cc
+#				src/web/src/helpers.cc
+
+test_web_helpers_LDADD = \
+				libpriv-test-run.la \
+				libpriv-utils.la
+
+test_web_helpers_CPPFLAGS =\
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+
+test_web_helpers_LDFLAGS =	${tntnet_LIBS} ${tntdb_LIBS} ${cxxtools_LIBS} ${czmq_LIBS}
+
+###
+check_PROGRAMS +=	test-utils-web
+
+test_utils_web_SOURCES = \
+				tests/shared/test-utils-web.cc
+#fty-common#	src/include/utils_web.h
+
+test_utils_web_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_utils_web_CPPFLAGS = \
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+
+test_utils_web_LDFLAGS =	${cxxtools_LIBS} ${czmq_LIBS}
+
+###
+check_PROGRAMS +=	test-tntmlm
+
+test_tntmlm_SOURCES = \
+				include/shared/tntmlm.h \
+				src/shared/tntmlm.cc \
+				tests/shared/test-tntmlm.cc
+
+test_tntmlm_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_tntmlm_CPPFLAGS = \
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+
+test_tntmlm_LDFLAGS =	${czmq_LIBS} ${malamute_LIBS} ${cxxtools_LIBS}
+
+check_PROGRAMS +=	test-utils-plusplus
+
+test_utils_plusplus_SOURCES = \
+				include/shared/utilspp.h \
+				tests/shared/test-utils++.cc
+
+test_utils_plusplus_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_utils_plusplus_CPPFLAGS = \
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+
+test_utils_plusplus_LDFLAGS =	${czmq_LIBS}
+
+check_PROGRAMS += 	test-utils
+
+test_utils_SOURCES = \
+				include/shared/utils.h \
+				tests/shared/test-utils.cc
+
+test_utils_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_utils_CPPFLAGS =	$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/
+
+test_utils_LDFLAGS =	${czmq_LIBS}
+
+noinst_PROGRAMS += 			test-subprocess
+test_subprocess_SOURCES = \
+				include/shared/subprocess.h \
+				tests/shared/test-subprocess.cc
+
+test_subprocess_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_subprocess_CPPFLAGS = \
+				$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/tests/include/
+test_subprocess_LDFLAGS =		${cxxtools_LIBS} ${czmq_LIBS}
+
+check_PROGRAMS += 	test-cidr
+test_cidr_SOURCES = \
+				src/shared/cidr.cc \
+				tests/shared/test-cidr.cc
+test_cidr_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+test_cidr_CFLAGS = 	${cidr_CFLAGS}
+test_cidr_CPPFLAGS = 	$(AM_CPPFLAGS) ${cidr_CPPFLAGS} \
+				-I$(abs_top_srcdir)/tests/include/
+test_cidr_LDFLAGS =	${cidr_LIBS}
+
+
+check_PROGRAMS += 	test-csv
+
+test_csv_SOURCES = \
+				include/shared/csv.h \
+				tests/shared/test-csv.cc
+
+test_csv_LDADD = \
+				libpriv-utils.la \
+				libpriv-test-run.la
+
+test_csv_CPPFLAGS =		$(AM_CPPFLAGS) \
+				-I$(abs_top_srcdir)/src \
+				-I$(abs_top_srcdir)/src/persist \
+				-I$(abs_top_srcdir)/src/msg \
+				-I$(abs_top_srcdir)/tests/include
+
+test_csv_LDFLAGS =		${cxxtools_LIBS} ${tntdb_LIBS} ${malamute_LIBS} ${fty_proto_LIBS}
+
+EXTRA_DIST +=	$(srcdir)/tests/shared/*.csv
+
+#----------------------------------------------------------------------
+#                        CI tests
+#----------------------------------------------------------------------
+
+cibin_programs += 	test-loadcsv
+
+test_loadcsv_SOURCES = 	tests/persist/test-loadcsv.cc
+
+test_loadcsv_LDADD = \
+			libpriv-utils.la \
+			libpriv-test-run.la
+
+test_loadcsv_CPPFLAGS = \
+			$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/ \
+			-I$(abs_top_srcdir)/src/persist \
+			-I$(abs_top_srcdir)/src/db
+
+test_loadcsv_LDFLAGS =	${tntdb_LIBS} ${cxxtools_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${fty_proto_LIBS}
+
+
+cibin_programs += 	test-db2
+
+test_db2_SOURCES = \
+			tests/persist/test-realdatamonitor.cc
+
+test_db2_LDADD = \
+			libpriv-utils.la \
+			libpriv-test-run.la
+
+test_db2_CPPFLAGS =	$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/ \
+			-I$(abs_top_srcdir)/src/persist \
+			-I$(abs_top_srcdir)/src/db
+
+test_db2_LDFLAGS =	${tntdb_LIBS} ${cxxtools_LIBS} ${cidr_LIBS} ${czmq_LIBS}
+
+cibin_programs += 	test-dbtopology
+
+test_dbtopology_SOURCES = \
+			tests/persist/test-topology.cc \
+			tests/persist/test-topology-power-to.cc \
+			tests/persist/test-topology-power-from.cc \
+			tests/persist/test-topology-power-datacenter.cc \
+			tests/persist/test-topology-power-group.cc \
+			tests/persist/test-topology-location-from.cc \
+			tests/persist/test-topology-location-to.cc
+
+test_dbtopology_LDADD = \
+			libpriv-utils.la \
+			libpriv-test-run.la
+
+test_dbtopology_CPPFLAGS = \
+			$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/ \
+			-I$(abs_top_srcdir)/src/persist \
+			-I$(abs_top_srcdir)/src/db
+
+test_dbtopology_LDFLAGS = \
+			${tntdb_LIBS} ${cxxtools_LIBS} ${cidr_LIBS} ${czmq_LIBS}
+
+
+cibin_programs += 	test-db-asset-crud
+
+test_db_asset_crud_SOURCES = \
+			tests/persist/test-asset-crud.cc \
+			tests/persist/test-asset-crud1.cc
+
+test_db_asset_crud_LDADD = \
+			libpriv-utils.la \
+			libpriv-test-run.la
+
+test_db_asset_crud_CPPFLAGS = \
+			$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/ \
+			-I$(abs_top_srcdir)/src/persist \
+			-I$(abs_top_srcdir)/src/db
+
+test_db_asset_crud_LDFLAGS = \
+			${tntdb_LIBS} ${cxxtools_LIBS} ${cidr_LIBS} ${czmq_LIBS}
+
+
+#### total power tests
+cibin_programs += 	test-totalpower
+
+test_totalpower_SOURCES = \
+			tests/persist/test-rack-power.cc \
+			tests/persist/test-dc-power.cc
+
+test_totalpower_LDADD = \
+			libpriv-utils.la \
+			libpriv-test-run.la
+
+test_totalpower_CPPFLAGS = \
+			$(AM_CPPFLAGS) \
+			-I$(abs_top_srcdir)/tests/include/ \
+			-I$(abs_top_srcdir)/src/persist \
+			-I$(abs_top_srcdir)/src/db
+
+test_totalpower_LDFLAGS = \
+			${tntdb_LIBS} ${cxxtools_LIBS} ${cidr_LIBS} ${czmq_LIBS}
+
+
+# Do we build and install CI programs by default? (see configure)
+# LISTS for cibin_programs depending on config for this build
+cibin_programs_list := $(cibin_programs)
+cibindir = ${pkgbindir}
+if ENABLE_CI_TESTS
+cibin_PROGRAMS = $(cibin_programs)
+else
+# Try to cheat automake into NOT building these programs on simple "make check"
+cibin_PROGRAMS =
+override cibin_programs =
+endif
+
+# These may be built explicitly, so should be removable in any case
+CLEANFILES += $(cibin_programs_list)
+
+# Note: variable cibin_PROGRAMS may be empty if not enabled via configure
+#   The variable cibin_programs holds the actual list of CI programs instead
+# TARGETS for cibin_programs depending on config for this build
+if ENABLE_CI_TESTS
+cibin_PROGRAMS: $(cibin_PROGRAMS)
+else
+cibin_PROGRAMS:
+endif
+cibin_programs: $(cibin_programs_list)
+
+### Verification that libfty_rest.so is in fact usable on binary level
+### Note that this creates no retainable output file
+web-link-test: src/libfty_rest.la
+			$(CXX) $(AM_CPPFLAGS) $(DEFAULT_INCLUDES) $(INCLUDES) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -o /dev/null \
+			$(abs_top_srcdir)/tests/web-linking-test.cc \
+			${cxxtools_LIBS} ${tntnet_LIBS} \
+			$(abs_top_builddir)/src/.libs/libfty_rest.so && \
+			echo "PASS: dynamic-link compilation test: everything for libfty_rest.so does link ok!" || \
+			( R=$$?; echo "FAIL ($$R): dynamic-link compilation test: libfty_rest.so unusable"; exit $$R; )
+
+TESTS += $(check_PROGRAMS)
+TESTS += $(check_SCRIPTS)
+
+#----------------------------------------------------------------------
 #                        SCM details
 #----------------------------------------------------------------------
 
-gitdetaildir =		$(datarootdir)/@PACKAGE@
+### Note: the legacy location for these git-details files is under
+### /usr/share/bios (renamed into /usr/share/fty by preinstall script)
+#gitdetaildir =		$(datarootdir)/@PACKAGE@
+gitdetaildir =		$(datarootdir)/bios
 gitdetail_DATA =	.git_details-fty-rest
 
 EXTRA_DIST +=		.git_details \
