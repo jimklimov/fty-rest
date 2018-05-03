@@ -23,6 +23,8 @@
         <option name = "test_install" value = "0" />
         <option name = "build_docs" value = "1" />
         <option name = "dist_docs" value = "1" />
+        <option name = "do_cleanup_after_build" value = "0" />
+        <option name = "do_cleanup_after_job" value = "1" />
     </target>
 
     <classfilename keep-tree = "true" pkgincludedir = "true" use-cxx = "true" pretty-print = "no" source-extension = "cc" />

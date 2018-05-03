@@ -117,7 +117,7 @@ pipeline {
             description: 'Try to collect CCACHE logs in the build workspace during this run, to analyze the build behavior?',
             name: 'USE_CCACHE_LOGGING')
         booleanParam (
-            defaultValue: true,
+            defaultValue: false,
             description: 'When using temporary subdirs in build/test workspaces, wipe them after successful builds? (Note: in current fty-rest codebase, abs_top_srcdir etc. are used, so the original build dir name is required to exist during distcheck etc.)',
             name: 'DO_CLEANUP_AFTER_BUILD')
         booleanParam (
