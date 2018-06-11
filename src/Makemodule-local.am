@@ -340,9 +340,10 @@ install-exec-hook-bioscsv:
 
 install-exec-hook-cihelpers:
 	if test x"$(ci_helperdir)" != x"$(prefix)/libexec/$(PACKAGE)" ; then \
+	    mkdir -p "$(DESTDIR)$(prefix)/libexec/$(PACKAGE)" && \
 	    for F in $(ci_helper_SCRIPTS) ; do \
 	        F="`basename "$$F"`"; \
-	        ln -fsr "$(DESTDIR)$(ci_helperdir)/$$F" "$(DESTDIR)$(prefix)/libexec/$(PACKAGE)/" ; \
+	        ln -fsr "$(DESTDIR)$(ci_helperdir)/$$F" "$(DESTDIR)$(prefix)/libexec/$(PACKAGE)/" || exit ; \
 	    done ; \
 	fi
 
