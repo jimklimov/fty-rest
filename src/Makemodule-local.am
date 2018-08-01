@@ -516,7 +516,7 @@ libpriv_utils_la_SOURCES = 	\
 				include/db/topology2.h \
 				src/db/topology2.cc
 
-libpriv_utils_la_LDFLAGS = ${cxxtools_LIBS} ${tntdb_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${fty_proto_LIBS} ${log4cplus_LIBS} ${fty_common_LIBS}
+libpriv_utils_la_LDFLAGS = ${cxxtools_LIBS} ${tntdb_LIBS} ${czmq_LIBS} ${malamute_LIBS} ${fty_proto_LIBS} ${log4cplus_LIBS} ${fty_common_LIBS} ${fty_common_db_LIBS} ${fty_common_rest_LIBS}
 
 libpriv_utils_la_CPPFLAGS =$(AM_CPPFLAGS) \
 				-I$(abs_top_srcdir)/src/persist \
