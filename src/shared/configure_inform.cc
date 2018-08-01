@@ -22,10 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdexcept>
 
 #include <fty_proto.h>
-#include <fty_common.h>
+#include <fty_common_db_dbpath.h>
 #include "db/assets.h"
 #include "shared/fty_asset_uptime_configurator.h"
 #include "db/assets/assetcr.h"
+#include <fty_common.h>
+
 
 static zhash_t*
 s_map2zhash (const std::map<std::string, std::string>& m)
@@ -59,7 +61,7 @@ void
         mlm_client_destroy (&client);
         throw std::runtime_error(" mlm_client_set_producer () failed.");
     }
-    tntdb::Connection conn = tntdb::connectCached (url);
+    tntdb::Connection conn = tntdb::connectCached (DBConn::url);
     for ( const  auto &oneRow : rows ) {
 
         std::string s_priority = std::to_string (oneRow.first.priority);

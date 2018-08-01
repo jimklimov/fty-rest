@@ -25,7 +25,7 @@
  #><%pre>
 #include <string>
 #include "shared/tntmlm.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 
 // info request
 static zmsg_t *
@@ -85,7 +85,7 @@ get_hw_capability (const char *type, std::string &res, const char*& errstr)
     }
     char *result = zmsg_popstr (resp);
     if (streq (result, "OK")) {
-        zstr_free (&result); 
+        zstr_free (&result);
         char *resp_type = zmsg_popstr (resp);
         if (streq(resp_type, type)) {
             zstr_free (&resp_type);

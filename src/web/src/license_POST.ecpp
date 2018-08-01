@@ -35,7 +35,9 @@
 
 #include "shared/utils.h"
 #include "cleanup.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
+#include <fty_common_filesystem.h>
 #include "shared/subprocess.h"
 
 </%pre>
@@ -161,7 +163,7 @@ bool database_ready;
 
         // once done, check environment files for accessing the database
         log_info("db services were started, re-reading password ...");
-        int rv_dbcred = dbreadcredentials();
+        int rv_dbcred = DBConn::dbreadcredentials();
         if (!rv_dbcred) {
             std::string message;
             if (rv_svc != 0) {
@@ -176,14 +178,14 @@ bool database_ready;
         // enforce reload of credentials, e.g. if timely service startup
         // had failed previously but the system has caught up by now
         log_info("db services were already started and set up, re-reading password just in case ...");
-        if (!dbreadcredentials())
+        if (!DBConn::dbreadcredentials())
             http_die ("internal-error", "Database password file is missing");
     }
 </%cpp>
 { "success" : "License version <$ clv $> accepted." }
 <%cpp>
     log_info("license was accepted, db services were started, db credentials were refreshed");
-    log_debug("Current DB URL is: %s", url.c_str());
+    log_debug("Current DB URL is: %s", DBConn::url.c_str());
 
     log_info("Making sure webserver can already connect to database...");
     // Note: if we earlier failed to dbreadcredentials() and have no envvars
@@ -195,7 +197,7 @@ bool database_ready;
 
     try {
         tntdb::Connection conn;
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
 
         tntdb::Statement st = conn.prepareCached(
             " SELECT * from t_empty"

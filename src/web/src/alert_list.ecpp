@@ -39,7 +39,8 @@
 #include "db/assets.h"
 #include "cleanup.h"
 #include "shared/utils_json.h"
-
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 #include <fty_common.h>
 
 #define RFC_ALERTS_LIST "rfc-alerts-list"
@@ -108,6 +109,7 @@ bool database_ready;
     std::string checked_asset;
     std::string checked_recursive;
     uint32_t element_id = 0;
+    std::string url = DBConn::url;
 
     {
         std::string state = qparam.param("state");

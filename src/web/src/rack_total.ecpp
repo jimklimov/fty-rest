@@ -35,7 +35,7 @@
 
 #include <sys/types.h>
 
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 
 #include "src/persist/assetcrud.h"
 #include "shared/data.h"

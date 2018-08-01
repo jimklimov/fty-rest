@@ -36,7 +36,8 @@
 #include <cxxtools/split.h>
 #include <cxxtools/csvserializer.h>
 #include <sys/types.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 
 #include "shared/utils.h"
 #include "shared/utilspp.h"
@@ -198,7 +199,7 @@ bool database_ready;
 
     std::string element_name;
     try{
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
 
         auto basic_ret = persist::select_asset_element_web_byId(conn, checked_element_id);
         if ( basic_ret.status == 0 && basic_ret.errsubtype == DB_ERROR_NOTFOUND) {

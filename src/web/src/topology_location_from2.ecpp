@@ -31,7 +31,8 @@
 #include <string>
 #include <exception>
 #include <czmq.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 
 #include "shared/data.h"
 #include "web/src/location_helpers.h"
@@ -64,7 +65,7 @@ bool database_ready;
     std::string checked_filter;
     std::string checked_feed_by;
     std::string checked_from;
-	tntdb::Connection conn = tntdb::connectCached (url);
+	tntdb::Connection conn = tntdb::connectCached (DBConn::url);
 
     {
         std::string from = qparam.param("from");

@@ -23,6 +23,7 @@
 #include <tntdb/connection.h>
 #include <tntdb/row.h>
 #include <fty_common.h>
+#include <fty_common_db_dbpath.h>
 
 #include "shared/utils.h"
 #include "db/assets.h"
@@ -55,7 +56,7 @@ int free_u_size( a_elmnt_id_t elementId)
 {
     try{
         tntdb::Connection conn;
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
 
         // get the rack u_size
         std::set<a_elmnt_id_t> rack_id{elementId};
@@ -162,7 +163,7 @@ rack_outlets_available(
 
     int rv;
     try {
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
         rv = persist::select_assets_by_container(
                 conn, elementId, cb);
 

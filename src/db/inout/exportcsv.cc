@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "db/assets.h"
 #include <fty_common.h>
+#include <fty_common_db_dbpath.h>
 #include "shared/utilspp.h"
 
 namespace persist {
@@ -138,7 +139,7 @@ void
     tntdb::Connection conn;
     std::string msg{"no connection to database"};
     try{
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
     }
     catch(...)
     {
@@ -373,7 +374,7 @@ void
     tntdb::Connection conn;
     std::string msg{"no connection to database"};
     try{
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
     }
     catch(...)
     {

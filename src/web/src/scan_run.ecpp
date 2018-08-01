@@ -25,7 +25,7 @@
  #><%pre>
 #include <string>
 #include "shared/tntmlm.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 #include <cxxtools/jsondeserializer.h>
 
 // stop request
@@ -58,12 +58,12 @@ stop_scan()
         log_fatal ("stop_scan: mlm_pool.get () failed.");
         return -1;
     }
-    
+
     zuuid_t *uuid = zuuid_new ();
-    zmsg_t *request = req_stop (uuid);   
-    
+    zmsg_t *request = req_stop (uuid);
+
     int rv = client->sendto ("fty-discovery", "stopscan", 1000, &request);
-    
+
     if (rv == -1)
     {
         zuuid_destroy (&uuid);
@@ -112,9 +112,9 @@ run_scan ()
 
     zuuid_t *uuid = zuuid_new ();
     zmsg_t *request = req_scan (uuid);
-    
+
     int rv = client->sendto ("fty-discovery", "LAUNCHSCAN", 1000, &request);
-    
+
     if (rv == -1) {
         zuuid_destroy (&uuid);
         log_fatal ("run_scan: client->sendto (address = '%s') failed.", "fty-discovery");
@@ -168,12 +168,12 @@ UserInfo user;
             {BiosProfile::Admin,     "CD"}
             };
     CHECK_USER_PERMISSIONS_OR_DIE (PERMISSIONS);
-    
+
     //std::string config = request.getArg ("config");
     //std::string range = request.getArg ("range");
     std::string range = qparam.param("range");
     //char *checked_range = strdup (range.c_str ());
-    
+
     int rv;
     if(request.getMethod() == "DELETE") {
         rv = stop_scan();
@@ -184,7 +184,7 @@ UserInfo user;
     else
         http_die("method-not-allowed", request.getMethod().c_str() );
 
-    
+
     if (rv == -1)
         http_die ("internal-error", "mlmpool.get () failed.");
     else
@@ -204,7 +204,7 @@ UserInfo user;
         http_die ("internal-error", "fty-discovery precedent scan currently stopping.");
     else
     if (rv == -7)
-        http_die ("internal-error", "fty-discovery already have a scan running.");    
+        http_die ("internal-error", "fty-discovery already have a scan running.");
     else
     if (rv == -8)
         http_die("bad-request-document", "Please check RFC-11 for valid json schema description.");

@@ -31,7 +31,8 @@
 #include <cxxtools/jsondeserializer.h>
 #include <cxxtools/regex.h>
 #include <cxxtools/join.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_rest_sasl.h>
 
 #include "shared/subprocess.h"
 #include "shared/cidr.h"

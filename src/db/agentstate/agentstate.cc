@@ -20,7 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <tntdb/row.h>
 #include <tntdb/error.h>
+#include <inttypes.h>
 
+#include <fty_common_db_dbpath.h>
 #include <fty_common.h>
 #include "shared/utils.h"
 
@@ -123,7 +125,7 @@ int
         const std::string &data)
 {
     uint16_t rows;
-    
+
     return update_agent_info( conn, agent_name, (void *)data.c_str(),
                               data.size(), rows);
 }
@@ -135,7 +137,7 @@ int
 {
     int result = 1;
     try {
-        auto connection = tntdb::connectCached(url);
+        auto connection = tntdb::connectCached(DBConn::url);
         result = save_agent_info(connection, agent_name, data );
         connection.close();
     } catch( const std::exception &e ) {
@@ -156,7 +158,7 @@ int
 
     if( select_agent_info(conn, agent_name, (void **)&data, size) == 0 ) {
         if( ! data )
-        {   
+        {
             // data is empty
             return 0;
         }
@@ -182,7 +184,7 @@ int
         std::string       &agent_info)
 {
     try {
-        auto connection = tntdb::connectCached(url);
+        auto connection = tntdb::connectCached(DBConn::url);
         return load_agent_info(connection, agent_name, agent_info);
     } catch( const std::exception &e ) {
         log_info("Cannot load agent %s info: %s", agent_name.c_str(), e.what() );

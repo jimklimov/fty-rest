@@ -28,7 +28,9 @@
 #include <utility>
 #include <cxxtools/jsonserializer.h>
 #include <cxxtools/serializationinfo.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
+
 #include "db/assets.h"
 #include "shared/utilspp.h"
 #include "src/persist/assettopology.h"
@@ -187,7 +189,7 @@ fill_array_powerchains (std::vector <std::tuple
     if (dbid == -2) {
             http_die ("internal-error", "Connecting to database failed.");
     }
-    rv = input_power_group_response (url, (uint32_t) dbid, devices_data, powerchains_data);
+    rv = input_power_group_response (DBConn::url, (uint32_t) dbid, devices_data, powerchains_data);
 
 
     if (rv == -1)

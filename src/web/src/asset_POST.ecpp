@@ -32,7 +32,8 @@
 #include "shared/configure_inform.h"
 #include "src/db/inout.h"
 #include "db/assets.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+
 </%pre>
 <%request scope="global">
 UserInfo user;

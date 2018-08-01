@@ -25,7 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <tntdb/result.h>
 #include <tntdb/error.h>
 #include <tntdb/transaction.h>
-#include <fty_common.h>
+#include <fty_common_rest.h>
+#include <fty_common_db_dbpath.h>
 
 #include "defs.h"
 #include "shared/asset_types.h"
@@ -756,7 +757,7 @@ db_reply_t
                 set ("name", element_name).
                 set ("id_type", element_type_id).
                 set ("id_subtype", subtype_id).
-                setNull ("id_parent"). 
+                setNull ("id_parent").
                 set ("status", status).
                 set ("priority", priority).
                 set ("asset_tag", asset_tag).
@@ -768,7 +769,7 @@ db_reply_t
                 set ("name", element_name).
                 set ("id_type", element_type_id).
                 set ("id_subtype", subtype_id).
-                set ("id_parent", parent_id). 
+                set ("id_parent", parent_id).
                 set ("status", status).
                 set ("priority", priority).
                 set ("asset_tag", asset_tag).

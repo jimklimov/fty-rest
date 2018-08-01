@@ -31,6 +31,7 @@
 #include <unistd.h>
 
 #include "db/assets.h"
+#include <fty_common_rest_helpers.h>
 #include <fty_common.h>
 
 static

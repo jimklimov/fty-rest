@@ -22,6 +22,7 @@
 #include <fty_proto.h>
 
 #include <fty_common.h>
+#include <fty_common_rest.h>
 
 #include "shared/utils.h"
 #include "shared/utilspp.h"

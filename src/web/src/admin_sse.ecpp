@@ -25,14 +25,14 @@
 #><%pre>
 #include <fty_proto.h>
 #include <tnt/tntnet.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 
 #include "web/src/sse.h"
 #include "shared/utils.h"
 #include "shared/utilspp.h"
 #include "db/assets.h"
 #include "cleanup.h"
-#include <fty_common.h>
-
 
 </%pre>
 <%request scope="global">
@@ -84,10 +84,10 @@ bool database_ready;
     sseManager.setDatacenterId((uint32_t) dbid);
 
     try {
-        sseManager.setConnection(tntdb::connectCached (url));
+        sseManager.setConnection(tntdb::connectCached (DBConn::url));
     }
     catch (const tntdb::Error& e) {
-        log_error ("tntdb::connectCached (url = '%s') failed: %s.", url.c_str (), e.what ());
+        log_error ("tntdb::connectCached (url = '%s') failed: %s.", DBConn::url.c_str (), e.what ());
         http_die ("internal-error", "Connecting to database failed.");
     }
     catch (const std::exception& e) {
@@ -120,7 +120,7 @@ bool database_ready;
     reply.setContentType("text/event-stream");
     reply.setDirectMode();
     reply.out().flush();
-    
+
     int64_t start = zclock_mono();
     int64_t sendNextExpTime = 0;
     int64_t diff = 0;
@@ -149,11 +149,11 @@ bool database_ready;
             log_info("Initialization shutdown request for tntnet: Sse stop");
             break;
         }
-      
+
         now = zclock_mono();
-        diff = now - start; 
-        
-        //check if token is still valid 
+        diff = now - start;
+
+        //check if token is still valid
         //If valid return the time before the session expiration
         tme = sseManager.checkTokenValidity();
         if (-1 == tme)
@@ -161,7 +161,7 @@ bool database_ready;
             log_info ("sse : Token revoked or expired");
             break;
         }
-        
+
         // Each minute, send the time before expiration
         if (now - sendNextExpTime > 60000) {
             // send the time before the token is expired
@@ -188,7 +188,7 @@ bool database_ready;
             if (zpoller_expired (sseManager.getPoller())) {
                 //Send heartbeat message
                 json = "data:{\"topic\":\"heartbeat\",\"payload\":{}}\n\n";
-                
+
                 reply.out()<<json;
                 if (reply.out().flush().fail())
                 {
@@ -197,13 +197,13 @@ bool database_ready;
                 }
                 continue;
             }
-            
+
             if (zpoller_terminated(sseManager.getPoller())){
                 log_error ("zpoller_wait(timeout = 10000) terminated.");
                 break;
             }
         }
-        
+
         // Got it
         //Check if the message comes from stream
         if (sseManager.isMessageComesFrom("STREAM DELIVER")) {
@@ -213,7 +213,7 @@ bool database_ready;
                 zmsg_destroy (&recv_msg);
                 continue;
             }
-            
+
             if (fty_proto_id (msgProto) == FTY_PROTO_ALERT) {
                 log_debug ("message id is  FTY_PROTO_ALERT");
                 json = sseManager.changeFtyProtoAlert2Json(msgProto);
@@ -224,10 +224,10 @@ bool database_ready;
                 log_debug ("message id %d is not implemented for sse",fty_proto_id (msgProto));
                 continue;
             }
-            
+
             fty_proto_destroy (&msgProto);
             zmsg_destroy (&recv_msg);
-            
+
             if (!json.empty()){
                 reply.out()<<json;
                 if (reply.out().flush().fail())
@@ -241,5 +241,5 @@ bool database_ready;
             zmsg_destroy (&recv_msg);
         }
     }
-    
+
 </%cpp>

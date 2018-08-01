@@ -30,7 +30,8 @@
 #include <fty_proto.h>
 
 #include <sys/types.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 
 #include "shared/upsstatus.h"
 #include "shared/data.h"
@@ -187,7 +188,7 @@ std::vector<uint32_t> asset_ids;
     // Temporary add connection here
     tntdb::Connection conn;
     try{
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
     }
     catch (const std::exception &e)
     {

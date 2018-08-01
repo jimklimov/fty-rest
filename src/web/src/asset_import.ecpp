@@ -30,7 +30,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <unistd.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 
 #include "src/db/inout.h"
 #include "bios_magic.h"

@@ -33,16 +33,15 @@
 #include <czmq.h>
 #include <malamute.h>
 #include <libcidr.h>
-#include <cxxtools/allocator.h>
 #include <tnt/tntnet.h>
-#include <tntdb.h>
 #if defined (HAVE_LIBMAGIC)
 #include <magic.h>
 #endif
 #include <fty_log.h>
-#include <fty_common.h>
-#include <ftyproto.h>
+#include <fty_common_db.h>
+#include <fty_common_rest.h>
 #include <sasl/sasl.h>
+#include <ftyproto.h>
 
 //  FTY_REST version macros for compile-time API detection
 #define FTY_REST_VERSION_MAJOR 1

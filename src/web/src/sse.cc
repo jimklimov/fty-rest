@@ -23,8 +23,8 @@
  * \author Nicolas DAVIET<nicolasdaviet@Eaton.com>
  * \brief Class and functions used by sse connection
  */
-
-#include <fty_common.h>
+#include <fty_common_rest.h>
+//#include <fty_common.h>
 #include "web/src/sse.h"
 #include "shared/data.h"
 #include "shared/utils_json.h"
@@ -119,7 +119,7 @@ zmsg_t * Sse::getMessageFromMlm()
 
 const char * Sse::loadAssetFromDatacenter()
 {
-  
+
   std::map<std::string, int> assets;
   std::map<std::string, int> assetsWithNoLocation;
 
@@ -188,7 +188,7 @@ const char * Sse::loadAssetFromDatacenter()
     return e.what();
   }
   _assetsWithNoLocation = assetsWithNoLocation;
-  
+
   if(ManageFtyLog::getInstanceFtylog()->isLogDebug())
   {
     log_debug("=== These elements are witout location ===");
@@ -237,7 +237,7 @@ std::string Sse::changeFtyProtoAsset2Json(fty_proto_t *asset)
   std::string json = "";
 
   std::string nameElement = std::string(fty_proto_name(asset));
-  //Check operation 
+  //Check operation
   //if delete send json
   if (streq(fty_proto_operation(asset), FTY_PROTO_ASSET_OP_DELETE))
   {
@@ -305,7 +305,7 @@ std::string Sse::changeFtyProtoAsset2Json(fty_proto_t *asset)
       log_debug("Asset parent : %s",fty_proto_aux_string(asset,"parent","0"));
       if(streq(fty_proto_aux_string(asset,"parent","0"),"0"))
       {
-        //Check if the asset is a device 
+        //Check if the asset is a device
         const char *type = fty_proto_aux_string(asset, "type", "none");
         log_debug("Asset type : %s", type);
 
@@ -314,7 +314,7 @@ std::string Sse::changeFtyProtoAsset2Json(fty_proto_t *asset)
         {
           //Add in the list of asset without location, will send a normal create message
           _assetsWithNoLocation.emplace(std::make_pair(nameElement, 5));
-        } 
+        }
         else
         {
           //Asset not in the datacenter which is not a device : Don't send any message
@@ -355,7 +355,7 @@ std::string Sse::changeFtyProtoAsset2Json(fty_proto_t *asset)
     {
       jsonPayload = getJsonAsset(_clientMlm, elemId);
     }
-    
+
     if (!jsonPayload.empty())
     {
       json += "data:{\"topic\":\"asset/" + nameElement + "\",\"payload\":";

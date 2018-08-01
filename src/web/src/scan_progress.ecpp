@@ -25,7 +25,7 @@
  #><%pre>
 #include <string>
 #include "shared/tntmlm.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 
 // progress request
 static zmsg_t *
@@ -68,61 +68,61 @@ get_scan_progress (std::string &output)
         log_fatal ("info: client->recv (timeout = '5') returned NULL");
         return -3;
     }
-    
+
     char *result = zmsg_popstr (resp);
     if (result) {
         if (streq (result, "OK")) {
             zstr_free (&result);
             output.append ("{");
-            
+
             char *status = zmsg_popstr (resp);
             if(!status) return -5;
             output.append ("\"status\" : \"");
             output.append(status);
-            if(streq(status, "-1")) {                
+            if(streq(status, "-1")) {
                 zstr_free (&status);
                 output.append("\"}");
                 zmsg_destroy(&resp);
                 return 0;
             }
-            output.append("\",");    
+            output.append("\",");
             zstr_free (&status);
-            
+
             char *progress = zmsg_popstr (resp);
             if (!progress) return -5;
             output.append ("\"progress\" : \"");
             output.append (progress);
             output.append ("%\", ");
             zstr_free (&progress);
-            
+
             char *discovered = zmsg_popstr (resp);
             if(!discovered) return -5;
             output.append ("\"discovered\" : \"");
             output.append(discovered);
             output.append("\",");
             zstr_free (&discovered);
-            
+
             char *discovered_ups = zmsg_popstr (resp);
             if(!discovered_ups) return -5;
             output.append ("\"ups-discovered\" : \"");
             output.append(discovered_ups);
             output.append("\",");
             zstr_free (&discovered_ups);
-            
+
             char *discovered_epdu = zmsg_popstr (resp);
             if(!discovered_epdu) return -5;
             output.append ("\"epdu-discovered\" : \"");
             output.append(discovered_epdu);
             output.append("\",");
             zstr_free (&discovered_epdu);
-            
+
             char *discovered_sts = zmsg_popstr (resp);
             if(!discovered_sts) return -5;
             output.append ("\"sts-discovered\" : \"");
             output.append(discovered_sts);
             output.append("\"");
             zstr_free (&discovered_sts);
-            
+
             output.append("}");
         }
         else if (streq (result, "ERROR")) {

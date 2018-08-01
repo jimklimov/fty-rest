@@ -32,7 +32,8 @@
 #include <string>
 #include <exception>
 #include <czmq.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
 
 #include "defs.h"
 #include "shared/data.h"
@@ -172,7 +173,7 @@ bool database_ready;
     asset_msg_set_recursive (input_msg, (byte) checked_recursive);
     asset_msg_set_filter_type (input_msg, (byte) checked_filter);
 
-    _scoped_zmsg_t *return_msg = process_assettopology (url.c_str(), &input_msg, checked_feed_by);
+    _scoped_zmsg_t *return_msg = process_assettopology (DBConn::url.c_str(), &input_msg, checked_feed_by);
     if (return_msg == NULL) {
         log_error ("Function process_assettopology() returned a null pointer");
         LOG_END;

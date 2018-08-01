@@ -26,7 +26,7 @@
  */
  #><%pre>
 #include "web/src/iface.h"
-#include <fty_common.h>
+#include <fty_common_rest.h>
 
 </%pre>
 <%request scope="global">

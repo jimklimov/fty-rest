@@ -30,7 +30,10 @@
 #include <malamute.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <fty_common_db_dbpath.h>
 #include <fty_common.h>
+#include <fty_common_rest.h>
+
 </%pre>
 <%request scope="global">
 UserInfo user;

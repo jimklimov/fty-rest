@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <tntdb/row.h>
 #include <tntdb/result.h>
 #include <tntdb/error.h>
-#include <fty_common.h>
+#include <fty_common_db_dbpath.h>
 #include "defs.h"
 
 
@@ -43,7 +43,7 @@ id_to_name_ext_name (uint32_t asset_id)
     std::string ext_name;
     try
     {
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         tntdb::Statement st = conn.prepareCached(
                 " SELECT asset.name, ext.value "
                 " FROM "
@@ -78,7 +78,7 @@ name_to_asset_id (std::string asset_name)
     {
         int64_t id = 0;
 
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         tntdb::Statement st = conn.prepareCached(
                 " SELECT id_asset_element"
                 " FROM"
@@ -110,7 +110,7 @@ extname_to_asset_id (std::string asset_ext_name)
     {
         int64_t id = 0;
 
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         tntdb::Statement st = conn.prepareCached(
                 " SELECT a.id_asset_element FROM t_bios_asset_element AS a "
                 " INNER JOIN t_bios_asset_ext_attributes AS e "
@@ -140,7 +140,7 @@ extname_to_asset_name (std::string asset_ext_name, std::string &asset_name)
 {
     try
     {
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         tntdb::Statement st = conn.prepareCached(
                 " SELECT a.name FROM t_bios_asset_element AS a "
                 " INNER JOIN t_bios_asset_ext_attributes AS e "
@@ -170,7 +170,7 @@ name_to_extname (std::string asset_name, std::string &ext_name)
 {
     try
     {
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         tntdb::Statement st = conn.prepareCached(
                 " SELECT e.value FROM t_bios_asset_ext_attributes AS e  "
                 " INNER JOIN t_bios_asset_element AS a "
@@ -1042,7 +1042,7 @@ int
 }
 
 
-int 
+int
     select_assets_all_container
         (tntdb::Connection &conn,
          std::vector<a_elmnt_tp_id_t> types,
@@ -1055,7 +1055,7 @@ int
     LOG_START;
 
     try {
-        std::string select = 
+        std::string select =
             " SELECT "
             "   t.name, "
             "   t.id_asset_element as asset_id, "
@@ -1086,8 +1086,8 @@ int
             }
             select += " t.status = \"" + status + "\"";
         }
-        
-        std::string end_select = "" ;       
+
+        std::string end_select = "" ;
         if (without != "") {
             if(!subtypes.empty() || !types.empty() || status != "" ) {
               select += " AND ";
@@ -1112,9 +1112,9 @@ int
                         "     AND t.id_asset_element = a.id_asset_element)";
             }
         }
-        
+
         select += end_select;
-        
+
         // Can return more than one row.
         tntdb::Statement st = conn.prepareCached (select);
 
@@ -1143,7 +1143,7 @@ int
     return select_assets_by_container(conn, element_id, {}, {},"","", cb);
 }
 
-int 
+int
     select_assets_without_container
         (tntdb::Connection &conn,
          std::vector<a_elmnt_tp_id_t> types,
@@ -1216,7 +1216,7 @@ int
             "   v.id_type as type_id "
             " FROM "
             "   v_bios_asset_element_super_parent AS v"
-            " WHERE "  
+            " WHERE "
             "   :containerid in (v.id_parent1, v.id_parent2, v.id_parent3, "
             "                    v.id_parent4, v.id_parent5, v.id_parent6, "
             "                    v.id_parent7, v.id_parent8, v.id_parent9, "
@@ -1234,8 +1234,8 @@ int
         if (status != "") {
             select += " AND v.status = \"" + status + "\"";
         }
-            
-        std::string end_select = "" ;       
+
+        std::string end_select = "" ;
         if (without != "") {
             if(without == "location") {
                 select += " AND v.id_parent1 is NULL ";
@@ -1257,9 +1257,9 @@ int
                         "     AND v.id_asset_element = a.id_asset_element)";
             }
         }
-        
+
         select += end_select;
-        
+
         // Can return more than one row.
         tntdb::Statement st = conn.prepareCached (select);
 

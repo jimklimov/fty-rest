@@ -32,8 +32,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cxxtools/join.h>
 
 #include <fty_proto.h>
-
-#include <fty_common.h>
+#include <fty_common_rest.h>
+#include <fty_common_db_dbpath.h>
 
 #include "../../persist/assetcrud.h"
 #include "cleanup.h"
@@ -1331,7 +1331,7 @@ std::pair<db_a_elmnt_t, persist::asset_operation>
     tntdb::Connection conn;
     std::string msg{"No connection to database"};
     try{
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
     }
     catch(...)
     {
@@ -1392,7 +1392,7 @@ void
     tntdb::Connection conn;
     std::string msg{"No connection to database"};
     try{
-        conn = tntdb::connectCached(url);
+        conn = tntdb::connectCached(DBConn::url);
     }
     catch(...)
     {

@@ -36,7 +36,7 @@
 #include "shared/subprocess.h"
 #include "shared/augtool.h"
 #include "shared/cidr.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 
 using namespace shared;
 
@@ -199,8 +199,8 @@ if(request.getMethod() == "PUT") {
             for (auto iface : interfaces) {
                 log_debug("Processing interface %s", iface.c_str ());
                 //avoid lo interface and some augtool cli weird iface
-                if (iface.find("lo")==std::string::npos 
-                        && iface.find("*")==std::string::npos 
+                if (iface.find("lo")==std::string::npos
+                        && iface.find("*")==std::string::npos
                         && iface.find("]")!=std::string::npos) {
                     std::size_t found = iface.find("]");
                     std::string sub_iface=iface.substr(0,found+1);

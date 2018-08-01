@@ -29,8 +29,8 @@
  * \brief Not yet documented file
  */
 #include <algorithm>
-#include <fty_common.h>
-
+#include <fty_common_db_dbpath.h>
+#include <fty_common_rest.h>
 #include "shared/data.h"
 
 #include "shared/asset_types.h"
@@ -97,7 +97,7 @@ db_reply <db_web_element_t>
     db_reply <db_web_element_t> ret;
 
     try{
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         log_debug ("connection was successful");
 
         auto basic_ret = persist::select_asset_element_web_byId(conn, id);
@@ -222,7 +222,7 @@ db_reply <std::map <uint32_t, std::string> >
     log_debug ("subtypeid = %" PRIi16 " typeid = %" PRIi16, subtype_id, type_id);
 
     try{
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
         ret = persist::select_short_elements(conn, type_id, subtype_id);
         if ( ret.status == 0 )
             bios_error_idx(ret.rowid, ret.msg, "internal-error", "");
@@ -254,7 +254,7 @@ db_reply_t
     // we will ignore it and discover it by ourselves
 
     try{
-        tntdb::Connection conn = tntdb::connectCached(url);
+        tntdb::Connection conn = tntdb::connectCached(DBConn::url);
 
         db_reply <db_web_basic_element_t> basic_info =
             persist::select_asset_element_web_byId(conn, id);

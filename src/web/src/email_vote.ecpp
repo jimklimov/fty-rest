@@ -24,7 +24,7 @@
  * \brief Sends voting email.
  */
  #><%pre>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 #include "shared/tntmlm.h"
 #include "shared/subprocess.h"
 #include "defs.h"
@@ -210,5 +210,3 @@ UserInfo user;
     zstr_free(&err_code);
     zstr_free(&err_message);
 </%cpp>
-
-

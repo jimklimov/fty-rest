@@ -25,7 +25,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <tntdb/row.h>
 #include <tntdb/error.h>
 
-#include <fty_common.h>
+#include <fty_common_db_dbpath.h>
+#include <fty_log.h>
 #include "persist_error.h"
 #include "shared/asset_types.h"
 
@@ -97,7 +98,7 @@ m_dvc_id_t convert_asset_to_monitor_old(const char* url,
     }
     else if ( device_discovered_id == 0 )
     {
-        log_warning("end: monitor counterpart for the %" PRIu32 " was not found", 
+        log_warning("end: monitor counterpart for the %" PRIu32 " was not found",
                                                 asset_element_id);
         throw bios::MonitorCounterpartNotFound ();
     }
@@ -105,7 +106,7 @@ m_dvc_id_t convert_asset_to_monitor_old(const char* url,
     return device_discovered_id;
 }
 
-int convert_monitor_to_asset_safe(const char* url, 
+int convert_monitor_to_asset_safe(const char* url,
                     m_dvc_id_t discovered_device_id, a_elmnt_id_t *asset_element_id)
 {
     if ( asset_element_id == NULL )
@@ -124,7 +125,7 @@ int convert_monitor_to_asset_safe(const char* url,
 }
 
 
-a_elmnt_id_t convert_monitor_to_asset(const char* url, 
+a_elmnt_id_t convert_monitor_to_asset(const char* url,
                     m_dvc_id_t discovered_device_id)
 {
     log_info("start");
@@ -147,7 +148,7 @@ a_elmnt_id_t convert_monitor_to_asset(const char* url,
     }
     catch (const tntdb::NotFound &e){
         // apropriate asset element was not found
-        log_warning("end: asset counterpart for the %" PRIu32 " was not found", 
+        log_warning("end: asset counterpart for the %" PRIu32 " was not found",
                                                 discovered_device_id);
         throw bios::NotFound();
     }
@@ -184,7 +185,7 @@ bool is_ok_name (const char* name)
     if (strchr (name, '_') != NULL ||
         strchr (name, '%') != NULL ||
         strchr (name, '@') != NULL)
-       return false; 
+       return false;
 
     return true;
 }
@@ -272,7 +273,7 @@ get_active_power_devices ()
     int count = 0;
     try
     {
-        tntdb::Connection conn = tntdb::connectCached (url);
+        tntdb::Connection conn = tntdb::connectCached (DBConn::url);
         tntdb::Statement st = conn.prepareCached (
             "SELECT COUNT(*) AS CNT FROM t_bios_asset_element "
             "WHERE id_subtype IN "
@@ -299,7 +300,7 @@ get_active_power_devices ()
 std::string get_status_from_db (std::string &element_name) {
     tntdb::Connection conn;
     try {
-        conn = tntdb::connectCached (url);
+        conn = tntdb::connectCached (DBConn::url);
     }
     catch ( const std::exception &e) {
         zsys_error ("DB: cannot connect, %s", e.what());

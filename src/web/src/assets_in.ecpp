@@ -1,4 +1,4 @@
-<#
+p<#
  #
  # Copyright (C) 2015 Eaton
  #
@@ -31,7 +31,9 @@
 #include <cxxtools/jsonserializer.h>
 #include <cxxtools/serializationinfo.h>
 #include <cxxtools/split.h>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
+#include <fty_common_db_dbpath.h>
+
 #include "shared/utilspp.h"
 #include "shared/asset_types.h"
 #include "db/assets.h"
@@ -174,10 +176,10 @@ bool database_ready;
     // create a database connection
     tntdb::Connection connection;
     try {
-        connection = tntdb::connectCached (url);
+        connection = tntdb::connectCached (DBConn::url);
     }
     catch (const tntdb::Error& e) {
-        log_error ("tntdb::connectCached (url = '%s') failed: %s.", url.c_str (), e.what ());
+        log_error ("tntdb::connectCached (url = '%s') failed: %s.", DBConn::url.c_str (), e.what ());
         http_die ("internal-error", "Connecting to database failed.");
     }
     catch (const std::exception& e) {
