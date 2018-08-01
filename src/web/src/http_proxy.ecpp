@@ -30,7 +30,7 @@
 #include <cxxtools/regex.h>
 #include <cxxtools/jsondeserializer.h>
 #include "shared/utils.h"
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 </%pre>
 <%request scope="global">
 UserInfo user;
@@ -93,7 +93,7 @@ UserInfo user;
         proxy_file_content += "export http_proxy https_proxy ftp_proxy\n";
 
         out_file << proxy_file_content;
-        out_file.close();        
+        out_file.close();
     }
 
     std::ifstream in_file (path);
