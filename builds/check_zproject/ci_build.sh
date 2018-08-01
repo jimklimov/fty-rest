@@ -12,11 +12,11 @@ git clone --quiet --depth 1 -b 4.2.0-FTY-master https://github.com/42ity/libzmq.
 git clone --quiet --depth 1 -b v3.0.2-FTY-master https://github.com/42ity/czmq.git czmq
 git clone --quiet --depth 1 -b 1.0-FTY-master https://github.com/42ity/malamute.git malamute
 git clone --quiet --depth 1 -b 1.2.3-FTY-master https://github.com/42ity/libcidr.git cidr
+git clone --quiet --depth 1 -b 2.2-FTY-master https://github.com/42ity/cxxtools.git cxxtools
 git clone --quiet --depth 1 -b 2.2-FTY-master https://github.com/42ity/tntnet.git tntnet
+git clone --quiet --depth 1 -b 1.3-FTY-master https://github.com/42ity/tntdb.git tntdb
 git clone --quiet --depth 1 -b 1.1.2-FTY-master https://github.com/42ity/log4cplus.git log4cplus
 git clone --quiet --depth 1 -b master https://github.com/42ity/fty-common-logging.git fty-common-logging
-git clone --quiet --depth 1 -b 2.2-FTY-master https://github.com/42ity/cxxtools.git cxxtools
-git clone --quiet --depth 1 -b 1.3-FTY-master https://github.com/42ity/tntdb.git tntdb
 git clone --quiet --depth 1 https://github.com/42ity/fty-common.git fty-common
 git clone --quiet --depth 1 https://github.com/42ity/fty-common-db.git fty-common-db
 git clone --quiet --depth 1 https://github.com/42ity/fty-common-rest.git fty-common-rest
