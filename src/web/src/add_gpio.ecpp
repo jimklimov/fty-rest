@@ -25,7 +25,6 @@
  #><%pre>
 #include <string>
 #include "shared/tntmlm.h"
-        //#include <fty_common.h>
 #include <fty_common_rest.h>
 #include <fty_log.h>
 

@@ -40,7 +40,6 @@
 #include <cxxtools/inifile.h>
 
 #include "db/inout.h"
-//#include "log.h"
 #include "shared/csv.h"
 
 static void

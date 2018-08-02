@@ -24,7 +24,6 @@
  * \brief Class and functions used by sse connection
  */
 #include <fty_common_rest.h>
-//#include <fty_common.h>
 #include "web/src/sse.h"
 #include "shared/data.h"
 #include "shared/utils_json.h"
