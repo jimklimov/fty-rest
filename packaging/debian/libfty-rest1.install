@@ -3,3 +3,4 @@
 # since tntnet shared object is not a typical library. Path is
 # e.g. /usr/lib/x86_64-linux-gnu/fty-rest/libfty_rest.so*
 usr/lib/*/*/libfty_rest.so*
+###usr/lib/*/libfty_rest.so.*

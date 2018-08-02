@@ -1,5 +1,6 @@
 #
 #    fty-rest - Common core REST API for 42ity project
+# Note: this file is customized after zproject generation, be sure to keep it
 #
 #    Copyright (C) 2014 - 2018 Eaton
 #
@@ -16,6 +17,7 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
 Source:         fty-rest
 Section:        net
 Priority:       optional
@@ -35,8 +37,10 @@ Build-Depends: debhelper (>= 9),
     liblog4cplus-dev,
     libfty-common-logging-dev,
     libfty-common-dev,
-    libfty-proto-dev,
+    libfty-common-db-dev,
+    libfty-common-rest-dev,
     libsasl2-dev,
+    libfty-proto-dev,
     asciidoc-base | asciidoc, xmlto,
     dh-autoreconf
 
@@ -64,8 +68,10 @@ Depends:
     liblog4cplus-dev,
     libfty-common-logging-dev,
     libfty-common-dev,
-    libfty-proto-dev,
+    libfty-common-db-dev,
+    libfty-common-rest-dev,
     libsasl2-dev,
+    libfty-proto-dev,
     libfty-rest1 (= ${binary:Version})
 Description: fty-rest development tools
  This package contains development files for fty-rest:

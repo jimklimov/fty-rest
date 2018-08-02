@@ -17,12 +17,17 @@ os:
 # in the default container with sudo==false, consider requiring a docker
 # image and/or a newer Ubuntu Trusty baseline VM, by uncommenting below.
 # See the current docs on http://travis-ci.org for up-to-date options.
+# NOTE: Here we need this for .travis.fix* script(s) below.
+# The "sudo" in fixsasl script may require this enabled, depending on
+# distro and package versions.
 #sudo: false
 sudo: required
 
+# Note: was uncommented in earlier builds (TODO: Check if needed)
 dist:
 - trusty
 
+# Note: was uncommented in earlier builds (TODO: Check if needed)
 services:
 - docker
 
@@ -51,7 +56,8 @@ env:
   matrix:
     - BUILD_TYPE=default
     - BUILD_TYPE=default-Werror
-#    - BUILD_TYPE=cmake
+### Note: we don't use CMake
+#   - BUILD_TYPE=cmake
 #   - BUILD_TYPE=android
 #   - BUILD_TYPE=check-py
 
@@ -78,6 +84,7 @@ pkg_deps_prereqs_source: &pkg_deps_prereqs_source
     - libfty-common-rest-dev
     - libfty-proto-dev
 
+# NOTE: Our forks are checked out and built without pkg dependencies in use
 pkg_deps_prereqs: &pkg_deps_prereqs
 #    - *pkg_deps_prereqs_source
     - *pkg_deps_prereqs_distro
@@ -134,6 +141,7 @@ matrix:
         sources: *pkg_src_zeromq_ubuntu14
         packages:
         - *pkg_deps_common
+### Note: we don't use CMake
 #  - env: BUILD_TYPE=cmake DO_CLANG_FORMAT_CHECK=1 CLANG_FORMAT=clang-format-5.0
 # For non-cmake users, there is an autotools solution with a bit more overhead
 # to have dependencies ready and pass configure script before making this check).
@@ -160,6 +168,7 @@ before_script:
 - ./.travis.fixsasl
 
 # Hand off to generated script for each BUILD_TYPE
+# Note: timeout bumped up
 script: travis_wait 30 ./ci_build.sh
 before_deploy: . ./ci_deploy.sh && ./ci_deploy_obs.sh
 deploy:

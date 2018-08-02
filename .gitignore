@@ -108,10 +108,12 @@ cxxtools/
 tntnet/
 tntdb/
 magic/
-fty-proto/
 log4cplus/
-fty-common/
 fty-common-logging/
+fty-common/
+fty-common-db/
+fty-common-rest/
+fty-proto/
 
 # Travis build area
 tmp/
