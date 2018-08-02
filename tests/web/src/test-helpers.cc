@@ -24,7 +24,7 @@
  * \brief Not yet documented file
  */
 #include <catch.hpp>
-#include <fty_common.h>
+#include <fty_common_rest_helpers.h>
 #include "preproc.h"
 
 TEST_CASE ("unicode related stuff", "[helpers]") {
@@ -40,7 +40,7 @@ TEST_CASE ("unicode related stuff", "[helpers]") {
         '_',
         '%',
         '@'
-    }; 
+    };
 
     SECTION ("utf8_contains_chars") {
         CHECK ( utf8_contains_chars (strings[0], exclude) == 1 );
@@ -55,7 +55,7 @@ TEST_CASE ("unicode related stuff", "[helpers]") {
         CHECK ( check_alert_rule_name ("name_of_web_param", std::string ("load.input_1phase").append (strings [3]), errors) == false ); // missing @
         CHECK ( check_alert_rule_name ("name_of_web_param", std::string ("realpower.default@").append (strings [0]), errors) == false ); // bad asset name
     }
-    
+
 }
 
 TEST_CASE ("check_element_identifier", "[helpers]") {
@@ -82,4 +82,3 @@ TEST_CASE ("check_element_identifier", "[helpers]") {
         CHECK ( errors.errors.size () == 1 );
     }
 }
-

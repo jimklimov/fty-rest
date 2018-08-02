@@ -30,7 +30,7 @@
 #include <cxxtools/serializationinfo.h>
 #include <cxxtools/jsondeserializer.h>
 #include <limits.h>
-#include <fty_common.h>
+#include <fty_common_rest_utils_web.h>
 
 TEST_CASE ("utils::json::escape","[utils::math::dtos][json][escape]")
 {
@@ -98,7 +98,7 @@ TEST_CASE ("utils::json::escape","[utils::math::dtos][json][escape]")
     };
 
     // a valid json { key : utils::json::escape (<string> } is constructed,
-    // fed into cxxtools::JsonDeserializer (), read back and compared 
+    // fed into cxxtools::JsonDeserializer (), read back and compared
 
     std::vector <std::string> tests_reading{
         {"newline in \n text \n\"\n times two"},
@@ -148,18 +148,18 @@ TEST_CASE ("utils::json::escape","[utils::math::dtos][json][escape]")
             CHECK_NOTHROW (deserializer.deserialize (si));
             std::string read;
             si.getMember ("read") >>= read;
-/*  TODO: feel free to fix this 
+/*  TODO: feel free to fix this
             CAPTURE (read);
             CAPTURE (it);
             CHECK ( read.compare (it) == 0 );
-*/            
-        }   
+*/
+        }
     }
 }
 
 TEST_CASE ("utils::json::jsonify","[utils::json::jsonify][json][escape]")
 {
-    // 
+    //
     int var_int = -1;
     long int var_long_int = -2;
     long long int var_long_long_int = -3;
@@ -189,7 +189,7 @@ TEST_CASE ("utils::json::jsonify","[utils::json::jsonify][json][escape]")
     std::list<int> list_int{4, -5, 6, 7};
 
     std::string x; // temporary result placeholder
-    
+
     SECTION ("single parameter ('inttype') invocation") {
         x = utils::json::jsonify (var_int);
         CHECK ( x.compare (std::to_string (var_int)) == 0);
@@ -247,35 +247,35 @@ TEST_CASE ("utils::json::jsonify","[utils::json::jsonify][json][escape]")
         CHECK ( x.compare ("\"*const char with a '\\\"' quote and newline \\\\n '\\\\\\\"'\"") == 0);
 
     }
-    
+
     SECTION ("single parameter ('iterable standard container') invocation") {
 
         x = utils::json::jsonify (vector_str);
         CHECK ( x.compare (R"([ "j\\nedna", "dva", "tri" ])") == 0);
-    
+
         x = utils::json::jsonify (vector_int);
         CHECK ( x.compare (R"([ 1, 2, 3 ])") == 0);
-    
+
         x = utils::json::jsonify (list_str);
         CHECK ( x.compare (R"([ "styri", "p\"at", "sest", "sedem" ])") == 0);
-    
+
         x = utils::json::jsonify (list_int);
         CHECK ( x.compare (R"([ 4, -5, 6, 7 ])") == 0);
-    
+
     }
 
     SECTION ("pairs") {
         x = utils::json::jsonify (*str_ptr, var_int64_t);
         CHECK ( x.compare (std::string("\"*const char with a '\\\"' quote and newline \\\\n '\\\\\\\"'\" : ") + std::to_string (var_int64_t)) == 0);
-        
+
         x = utils::json::jsonify ("hey\"!\n", str_ref);
         CHECK ( x.compare ("\"hey\\\"!\\\\n\" : \"*const char with a '\\\"' quote and newline \\\\n '\\\\\\\"'\"") == 0);
 
         x = utils::json::jsonify (-6, -7);
-        CHECK ( x.compare (R"("-6" : -7)") == 0 ); 
+        CHECK ( x.compare (R"("-6" : -7)") == 0 );
 
         x = utils::json::jsonify (var_uint64_t, str);
-        CHECK ( x.compare (std::string ("\"") + std::to_string (var_uint64_t) + "\" : " + "\"*const char with a '\\\"' quote and newline \\\\n '\\\\\\\"'\"") == 0 ); 
+        CHECK ( x.compare (std::string ("\"") + std::to_string (var_uint64_t) + "\" : " + "\"*const char with a '\\\"' quote and newline \\\\n '\\\\\\\"'\"") == 0 );
 
 
         x = utils::json::jsonify ("test", vector_str);
@@ -312,7 +312,7 @@ TEST_CASE ("utils::json::create_error_json","[utils::json::create_error_json][js
     v.push_back (std::make_tuple (47, "Received value 'def'.", ""));
     v.push_back (std::make_tuple (47, "Received value 'ghi'.", ""));
     x = utils::json::create_error_json (v);
-    CAPTURE (x); 
+    CAPTURE (x);
     CHECK ( x.compare (
 "{\n\t\"errors\": [\n\t\t{\n\t\t\t\"message\": \"Received value 'abc'.\",\n\t\t\t\"code\": 47\n\t\t},\n\t\t{\n\t\t\t\"message\": \"Received value 'def'.\",\n\t\t\t\"code\": 47\n\t\t},\n\t\t{\n\t\t\t\"message\": \"Received value 'ghi'.\",\n\t\t\t\"code\": 47\n\t\t}\n\t]\n}\n") == 0 );
 
