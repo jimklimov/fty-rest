@@ -1,6 +1,7 @@
 # Travis CI script
 # This is a skeleton created by zproject.
 # You can add hand-written code here.
+### Note: Customized after generation; take care upon regens
 
 language:
 - cpp
@@ -156,7 +157,7 @@ before_install:
 
 ### Note: Fix up SASL pkgconfig before build
 before_script:
-./.travis.fixsasl
+- ./.travis.fixsasl
 
 # Hand off to generated script for each BUILD_TYPE
 script: travis_wait 30 ./ci_build.sh

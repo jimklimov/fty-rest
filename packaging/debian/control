@@ -16,7 +16,6 @@
 #    You should have received a copy of the GNU General Public License along
 #    with this program; if not, write to the Free Software Foundation, Inc.,
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
 Source:         fty-rest
 Section:        net
 Priority:       optional
@@ -36,10 +35,8 @@ Build-Depends: debhelper (>= 9),
     liblog4cplus-dev,
     libfty-common-logging-dev,
     libfty-common-dev,
-    libfty-common-db-dev,
-    libfty-common-rest-dev,
-    libsasl2-dev,
     libfty-proto-dev,
+    libsasl2-dev,
     asciidoc-base | asciidoc, xmlto,
     dh-autoreconf
 
@@ -67,21 +64,37 @@ Depends:
     liblog4cplus-dev,
     libfty-common-logging-dev,
     libfty-common-dev,
-    libfty-common-db-dev,
-    libfty-common-rest-dev,
-    libsasl2-dev,
     libfty-proto-dev,
+    libsasl2-dev,
     libfty-rest1 (= ${binary:Version})
 Description: fty-rest development tools
  This package contains development files for fty-rest:
  common core rest api for 42ity project
 
+# Customization over zproject-generated code follows
+# for the legacy-named metapackage to group the common
+# installation dependency for other components:
 Package: fty-rest
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends},
-Description: runnable binaries from fty-rest
- Main package for fty-rest:
- common core rest api for 42ity project
+Section: net
+Priority: optional
+Depends:
+    libfty-rest1 (= ${binary:Version}),
+    fty-rest-scripts (= ${binary:Version}),
+    fty-rest-clients (= ${binary:Version}),
+    ${misc:Depends},
+    augeas-tools,
+    tntdb-mysql4,
+    libcidr0,
+    tntnet-runtime,
+    malamute,
+    libsnmp30,
+    cracklib-runtime,
+    ipc-data
+Recommends: msmtp, nut
+Description: grouping of end-user solution with fty-rest
+ This metapackage depends on actual packages needed to implement
+ the core 42ity REST API with fty-rest for end-users of a product.
 
 Package: fty-rest-dbg
 Architecture: any
@@ -93,3 +106,24 @@ Depends:
 Description: fty-rest debugging symbols
  This package contains the debugging symbols for fty-rest:
  common core rest api for 42ity project.
+
+# Customization over zproject-generated code follows:
+Package: fty-rest-scripts
+Architecture: any
+Section: net
+Priority: optional
+Depends:
+    ${misc:Depends}
+Description: helper scripts used by fty-rest
+ This package contains helper scripts and data files used by
+ the overall solution with fty-rest.
+
+Package: fty-rest-clients
+Architecture: any
+Section: net
+Priority: optional
+Depends:
+    libfty-rest1 (= ${binary:Version}),
+    ${misc:Depends}, ${shlibs:Depends}
+Description: binary programs using fty-rest elements
+ This package contains binary programs that go along with fty-rest.
