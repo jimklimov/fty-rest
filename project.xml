@@ -35,6 +35,11 @@
           time out and then consume a lot of disk. No postmortems
           were actively needed in the past months though. -->
         <option name = "do_cleanup_after_failed_job" value = "1" />
+
+        <!-- Try to avoid avalanche rebuilds of same code on our CI -->
+        <option name = "use_earlymilestone" value = "1" />
+        <option name = "use_build_nonconcurrent" value = "1" />
+        <option name = "use_checkout_explicit" value = "1" />
     </target>
 
     <classfilename keep-tree = "true" pkgincludedir = "true" use-cxx = "true" pretty-print = "no" source-extension = "cc" />
