@@ -85,11 +85,13 @@ This package contains shared library for fty-rest: common core rest api for 42it
 %postun -n libfty_rest1 -p /sbin/ldconfig
 
 # Note: pathnames below were customized to match the Makefile with legacy paths
+# and the .so file is delivered as part of main package for tntnet to find it
 %files -n libfty_rest1
 %defattr(-,root,root)
 %doc COPYING
 #%{_libdir}/libfty_rest.so.*
 %{_libdir}/%{name}/libfty_rest.so.*
+%{_libdir}/%{name}/libfty_rest.so
 
 %package devel
 Summary:        common core rest api for 42ity project
@@ -118,11 +120,12 @@ common core rest api for 42ity project development tools
 This package contains development files for fty-rest: common core rest api for 42ity project
 
 # Note: pathnames below were customized to match the Makefile with legacy paths
+# and the .so file is delivered as part of main package for tntnet to find it
 %files devel
 %defattr(-,root,root)
 %{_includedir}/*
 #%{_libdir}/libfty_rest.so
-%{_libdir}/%{name}/libfty_rest.so
+###%{_libdir}/%{name}/libfty_rest.so
 %{_libdir}/pkgconfig/libfty_rest.pc
 %{_mandir}/man3/*
 %{_mandir}/man7/*
