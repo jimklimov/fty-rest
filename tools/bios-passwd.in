@@ -119,7 +119,12 @@ if [ ! -x "$TESTPASS" ]; then
     die "Can not test password strength: TESTPASS='$TESTPASS' not executable"
 fi
 
-printf "${USER}"'\n'"${NEW_PASSWD}"'\n'"${OLD_PASSWD}"'\n' | "$TESTPASS" || \
+{ "$TESTPASS" || \
     { RES=$?; echo "FAILED($RES) the password strength test" >&2; exit $RES; }
+} << EOF
+${USER}
+${NEW_PASSWD}
+${OLD_PASSWD}
+EOF
 
 do_passwd "${USER}" "${OLD_PASSWD}" "${NEW_PASSWD}"
