@@ -120,7 +120,7 @@ check_passwd_cracklib() {
         OUT="`su -c "${CRACKLIB_CHECK}" "${NEW_USER}" << EOF
 ${NEW_PASSWD}
 EOF`" && \
-        [[ -n "`egrep ': OK$' >/dev/null << EOF
+        [[ -n "`egrep ': OK$' << EOF
 ${OUT}
 EOF`" ]] || \
         RES=11
@@ -129,7 +129,7 @@ EOF`" ]] || \
         OUT="`${CRACKLIB_CHECK} << EOF
 ${NEW_PASSWD}
 EOF`" && \
-        [[ -n "`egrep ': OK$' >/dev/null << EOF
+        [[ -n "`egrep ': OK$' << EOF
 ${OUT}
 EOF`" ]] || \
         RES=11
