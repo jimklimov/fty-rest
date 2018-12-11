@@ -202,12 +202,6 @@
         release = "master"
         test = "fty_common_rest_selftest" >
 
-        <use project = "libsodium" prefix = "sodium"
-            repository = "https://github.com/42ity/libsodium.git"
-            release = "1.0.5-FTY-master"
-            test = "sodium_init"
-            />
-
         <use project = "cxxtools" test = "cxxtools::Utf8Codec::Utf8Codec" header = "cxxtools/allocator.h"
             repository = "https://github.com/42ity/cxxtools.git"
             release = "2.2-FTY-master"
