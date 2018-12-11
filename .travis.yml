@@ -36,6 +36,7 @@ sudo: required
 # Set CI_REQUIRE_GOOD_CLANG_FORMAT=true to fail if "clang-format" check is not clean
 env:
   global:
+    # Note: Here we enable profiling of the Travis builds
     - CI_TIME=true
     - CI_TRACE=false
     - CI_CONFIG_QUIET=true
