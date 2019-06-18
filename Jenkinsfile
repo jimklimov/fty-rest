@@ -120,7 +120,7 @@ pipeline {
             name: 'USE_CCACHE_LOGGING')
         booleanParam (
             defaultValue: false,
-            description: 'When using temporary subdirs in build/test workspaces, wipe them right after each successful build stage?',
+            description: 'When using temporary subdirs in build/test workspaces, wipe them right after each successful build stage? (Note: in current fty-rest codebase, abs_top_srcdir etc. are used, so the original build dir name is required to exist during distcheck etc.)',
             name: 'DO_CLEANUP_AFTER_BUILD')
         booleanParam (
             defaultValue: true,
