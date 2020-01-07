@@ -25,6 +25,7 @@
  #><%pre>
 #include <sys/types.h>
 #include <unistd.h>
+#include <mutex>
 
 #include "shared/data.h"
 #include "shared/configure_inform.h"
@@ -33,6 +34,11 @@
 #include <fty_common_macros.h>
 #include <fty_common_rest_audit_log.h>
 </%pre>
+
+<%application>
+std::mutex g_deleteAssetMutex;
+</%application>
+
 <%thread scope="global">
 asset_manager     asset_mgr;
 </%thread>
@@ -75,13 +81,17 @@ bool database_ready;
     }
     // end sanity checks
 
+    std::unique_lock<std::mutex> lock1(g_deleteAssetMutex);
+
     // get id by name
     int64_t dbid = DBAssets::name_to_asset_id (checked_id);
     if (dbid == -1) {
+        lock1.unlock();
         log_error_audit ("Request DELETE asset id %s FAILED", id.c_str ());
         http_die ("element-not-found", checked_id.c_str ());
     }
     if (dbid == -2) {
+        lock1.unlock();
         std::string err =  TRANSLATE_ME ("Database failure");
         log_error_audit ("Request DELETE asset id %s FAILED", id.c_str ());
         http_die ("internal-error", err.c_str ());
@@ -90,6 +100,8 @@ bool database_ready;
     // delete it
     db_a_elmnt_t row;
     auto ret = asset_mgr.delete_item (dbid, row);
+    lock1.unlock();
+    
     if ( ret.status == 0 ) {
         if ( ret.errsubtype == DB_ERROR_NOTFOUND ) {
             log_error_audit ("Request DELETE asset id %s FAILED", id.c_str ());
