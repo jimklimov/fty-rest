@@ -120,7 +120,7 @@ bool database_ready;
     }
 
     messagebus::Message msgRequest;
-    msgRequest.metaData()[messagebus::Message::COORELATION_ID] = messagebus::generateUuid();
+    msgRequest.metaData()[messagebus::Message::CORRELATION_ID] = messagebus::generateUuid();
     msgRequest.metaData()[messagebus::Message::TO] = "fty-nut-command";
     msgRequest.metaData()[messagebus::Message::SUBJECT] = "PerformCommands";
     msgRequest.userData() << commandList;
