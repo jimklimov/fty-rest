@@ -1359,7 +1359,7 @@ static std::pair<db_a_elmnt_t, persist::asset_operation>
                      catch (const std::exception &e)
                      {
                         std::string error = "The asset "+id_str+" is imported but a licensing error occured: "+ std::string(e.what());
-                        std::string err = JSONIFY (error.what());
+                        std::string err = JSONIFY (error.c_str());
                         bios_throw ("licensing-err", err.c_str ())
                      }
 
