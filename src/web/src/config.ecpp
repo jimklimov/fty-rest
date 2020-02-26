@@ -438,40 +438,40 @@ UserInfo user;
     ConfigMap mapping = loadMapping(mappingZconfig);
     zconfig_destroy(&mappingZconfig);
 
-    ///////////////////
-    ///     GET     ///
-    ///////////////////
-    if (request.isMethodGET ()) {
-        std::string key = qparam.param ("key");
-        if (key.empty()) {
-            http_die ("request-param-required", "key");
+    try {
+        ///////////////////
+        ///     GET     ///
+        ///////////////////
+        if (request.isMethodGET ()) {
+            std::string key = qparam.param ("key");
+            if (key.empty()) {
+                bios_throw ("request-param-required", "key");
+            }
+            cxxtools::JsonSerializer serializer (reply.out ());
+            serializer.beautify (true);
+
+            cxxtools::SerializationInfo si;
+            cxxtools::SerializationInfo configSi;
+            configSi.setName("config");
+            configSi.addMember("key") <<= key;
+            configSi.addMember("") <<= loadConfig(mapping, key); // "value" key added inside loadConfig()
+            si.addMember("") <<= configSi;
+
+            serializer.serialize (si).finish ();
+            return HTTP_OK;
         }
-        cxxtools::JsonSerializer serializer (reply.out ());
-        serializer.beautify (true);
 
-        cxxtools::SerializationInfo si;
-        cxxtools::SerializationInfo configSi;
-        configSi.setName("config");
-        configSi.addMember("key") <<= key;
-        configSi.addMember("") <<= loadConfig(mapping, key); // "value" key added inside loadConfig()
-        si.addMember("") <<= configSi;
-
-        serializer.serialize (si).finish ();
-        return HTTP_OK;
-    }
-
-    ////////////////////
-    ///     POST      //
-    ////////////////////
-    if (request.isMethodPOST ()) {
-        try {
+        ////////////////////
+        ///     POST      //
+        ////////////////////
+        else if (request.isMethodPOST ()) {
             std::stringstream input (request.getBody (), std::ios_base::in);
             cxxtools::JsonDeserializer deserializer (input);
             cxxtools::SerializationInfo request_doc;
             deserializer.deserialize (request_doc);
 
             if (request_doc.category() != cxxtools::SerializationInfo::Object) {
-                throw std::runtime_error("Request document must be an object.");
+                bios_throw("bad-request-document", "Request document must be an object.");
             }
 
             std::lock_guard<std::mutex> lock (config_mux);
@@ -484,14 +484,18 @@ UserInfo user;
             log_info_audit ("Request CREATE config SUCCESS");
             return HTTP_OK;
         }
-        catch (const BiosError &e) {
+    }
+    catch (const BiosError &e) {
+        if (request.isMethodPOST ()) {
             log_error_audit ("Request CREATE config FAILED");
-            http_die_idx (e.idx, e.what ());
         }
-        catch (const std::exception &e) {
+        http_die_idx (e.idx, e.what ());
+    }
+    catch (const cxxtools::SerializationError &e) {
+        if (request.isMethodPOST ()) {
             log_error_audit ("Request CREATE config FAILED");
-            http_die ("bad-request-document", e.what ());
         }
+        http_die ("bad-request-document", e.what ());
     }
 }
 </%cpp>
