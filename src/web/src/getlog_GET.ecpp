@@ -343,6 +343,11 @@ UserInfo user;
 
     std::string message;
 
+    // Parsed, trusted values (if populated)
+    std::string logname_base;
+    std::string logname_ext;
+    bool logname_isRealFile = false; // Return HTTP-404 or HTTP-500 if not found?
+
     try {
         // get args
         std::string slogname_base = request.getArg ("logname_base");
@@ -379,9 +384,8 @@ UserInfo user;
         //ftylog_setVeboseMode(ftylog_getInstance());
         //slogname_base = "ALL"; slogname_ext = ".gz";
 
-        std::string logname_base = slogname_base;
-        std::string logname_ext = slogname_ext;
-        bool logname_isRealFile = false; // Return HTTP-404 or HTTP-500 if not found?
+        logname_base = slogname_base;
+        logname_ext = slogname_ext;
 
         // check ext
         if ((logname_ext != "")
