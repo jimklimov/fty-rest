@@ -326,17 +326,18 @@ UserInfo user;
     // e.g. exports from journalctl, so logNAME and logFILE are logically and
     // maybe functionally different beasts below...
 
-    // supported (baseName, filePath) pairs
+    // supported (baseName, filePath, isRealFile) tuples
     struct {
         std::string baseName;
         std::string filePath;
+        bool isRealFile;
     } logsData [] = {
-        { "messages",       "/var/log/messages" },
-        { "www-audit",      "/var/log/tntnet/www-audit.log" },
-        { "mass-mgr-audit", "/var/log/etn-mass-management.audit.log" },
-        { "emc4j-audit",    "/var/log/etn-emc4j-ipm2/karaf.log" },
-        { "journald",       "/tmp/journald.log" }, // gen. by journalctl
-        { "ALL",            "/tmp/getlog_all.tar" }, // archive, all logfiles above
+        { "messages",       "/var/log/messages", true },
+        { "www-audit",      "/var/log/tntnet/www-audit.log", true },
+        { "mass-mgr-audit", "/var/log/etn-mass-management.audit.log", true },
+        { "emc4j-audit",    "/var/log/etn-emc4j-ipm2/karaf.log", true },
+        { "journald",       "/tmp/journald.log", false }, // gen. by journalctl
+        { "ALL",            "/tmp/getlog_all.tar", false }, // archive, all logfiles above
         { "", "" } // term
     };
 
@@ -380,6 +381,7 @@ UserInfo user;
 
         std::string logname_base = slogname_base;
         std::string logname_ext = slogname_ext;
+        bool logname_isRealFile = false; // Return HTTP-404 or HTTP-500 if not found?
 
         // check ext
         if ((logname_ext != "")
@@ -397,6 +399,7 @@ UserInfo user;
         for (int i = 0; !logsData[i].baseName.empty(); ++i) {
             if (logname_base == logsData[i].baseName) {
                 logfile = logsData[i].filePath;
+                logname_isRealFile = logsData[i].isRealFile;
                 break;
             }
         }
@@ -675,7 +678,7 @@ UserInfo user;
         log_error ("%s", message.c_str ());
 
         // TODO: Use (define?) a dedicated exception class; maybe employ bios_throw
-        if ( e.what().find( TRANSLATE_ME ("Could not open requested logfile: ") ) != std::string::npos) {
+        if (logname_isRealFile && e.what().find( TRANSLATE_ME ("Could not open requested logfile: ") ) != std::string::npos) {
             http_die ("not-found", logname_base);
         } else {
             std::string err =  TRANSLATE_ME ("Exception caught. Please check logs for more details.");
