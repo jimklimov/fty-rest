@@ -548,6 +548,7 @@ UserInfo user;
             std::ifstream in(logfile.c_str());
             if (!in) {
                 if (delete_logfile) remove(logfile.c_str());
+                // This exception string is processed below to return HTTP-404 and not HTTP-500
                 throw std::runtime_error(TRANSLATE_ME ("Could not open requested logfile: ") + logfile);
             }
             std::ostringstream out;
@@ -672,8 +673,14 @@ UserInfo user;
         reply.resetContent();
         message.assign ("Exception caught: ").append (e.what ());
         log_error ("%s", message.c_str ());
-        std::string err =  TRANSLATE_ME ("Exception caught. Please check logs for more details.");
-        http_die( "internal-error", err.c_str ());
+
+        // TODO: Use (define?) a dedicated exception class; maybe employ bios_throw
+        if ( e.what().find( TRANSLATE_ME ("Could not open requested logfile: ") ) != std::string::npos) {
+            http_die ("not-found", logname_base);
+        } else {
+            std::string err =  TRANSLATE_ME ("Exception caught. Please check logs for more details.");
+            http_die ("internal-error", err.c_str ());
+        }
     }
 
 </%cpp>
