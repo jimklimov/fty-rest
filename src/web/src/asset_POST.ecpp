@@ -144,14 +144,14 @@ bool database_ready;
 
     try
     {
-        if (asset.isPowerAsset () && asset.getStatusString() == "active")
+        if (asset.isPowerAsset() && asset.getStatusString() == "active")
         {
             mlm::MlmSyncClient client (AGENT_FTY_ASSET, AGENT_ASSET_ACTIVATOR);
             fty::AssetActivator activationAccessor (client);
             if (!activationAccessor.isActivable (asset))
             {
                 std::string err = TRANSLATE_ME ("Asset cannot be activated");
-                throw new std::runtime_error (err);
+                throw std::runtime_error (err);
             }
         }
     }

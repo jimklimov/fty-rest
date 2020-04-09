@@ -669,10 +669,12 @@ static std::pair<db_a_elmnt_t, persist::asset_operation>
          std::set<a_elmnt_id_t> &ids,
          bool sanitize,
          size_t rc_0,
-         LIMITATIONS_STRUCT limitations
+         LIMITATIONS_STRUCT limitations,
+         std::string & warningMessages
          )
 {
     LOG_START;
+    warningMessages="";
 
     log_debug ("################ Row number is %zu", row_i);
     static const std::set<std::string> STATUSES = \
@@ -1285,9 +1287,10 @@ static std::pair<db_a_elmnt_t, persist::asset_operation>
                     }
                     catch (const std::exception &e)
                     {
-                        std::string error = "The asset "+id_str+" is updated but a licensing error occured: "+ std::string(e.what());
-                        std::string err = JSONIFY (error.c_str());
-                        bios_throw ("licensing-err", err.c_str ())
+                        warningMessages += std::string(TRANSLATE_ME("Element '%s' is updated but a licensing error occured: %s", id_str.c_str(), e.what()));
+                        //std::string error = "The asset "+id_str+" is updated but a licensing error occured: "+ std::string(e.what());
+                        //std::string err = JSONIFY (error.c_str());
+                        //bios_throw ("licensing-err", err.c_str ())
                     }
                 }
             }
@@ -1358,9 +1361,10 @@ static std::pair<db_a_elmnt_t, persist::asset_operation>
                      }
                      catch (const std::exception &e)
                      {
-                        std::string error = "The asset "+id_str+" is imported but a licensing error occured: "+ std::string(e.what());
-                        std::string err = JSONIFY (error.c_str());
-                        bios_throw ("licensing-err", err.c_str ())
+                         warningMessages += std::string(TRANSLATE_ME("Element '%s' is updated but a licensing error occured: %s", id_str.c_str(), e.what()));
+                        //std::string error = "The asset "+id_str+" is imported but a licensing error occured: "+ std::string(e.what());
+                        //std::string err = JSONIFY (error.c_str());
+                        //bios_throw ("licensing-err", err.c_str ())
                      }
 
                 }
@@ -1523,7 +1527,8 @@ std::pair<db_a_elmnt_t, persist::asset_operation>
     }
     LIMITATIONS_STRUCT limitations;
     get_licensing_limitation(limitations);
-    auto ret = process_row(conn, cm, 1, TYPES, SUBTYPES, ids, true, rc_0, limitations);
+    std::string warningMessage;
+    auto ret = process_row(conn, cm, 1, TYPES, SUBTYPES, ids, true, rc_0, limitations, warningMessage);
     LOG_END;
     return ret;
 }
@@ -1591,10 +1596,20 @@ void
         for (size_t row_i = 1; row_i != cm.rows(); ++row_i) {
             if (processedRows.find (row_i) != processedRows.end ()) continue;
             try{
-                auto ret = process_row(conn, cm, row_i, TYPES, SUBTYPES, ids, true, rc0, limitations);
+                std::string warningMessages;
+                auto ret = process_row(conn, cm, row_i, TYPES, SUBTYPES, ids, true, rc0, limitations, warningMessages);
                 touch_fn ();
-                okRows.push_back (ret);
-                log_info ("row %zu was imported successfully", row_i);
+                if(warningMessages.empty())
+                {
+                    okRows.push_back (ret);
+                    log_info ("row %zu was imported successfully", row_i);
+                }
+                else
+                {
+                    failRows.insert(std::make_pair(row_i + 1, warningMessages));
+                    log_error ("row %zu imported with issue: %s", row_i, warningMessages.c_str());
+                }
+
                 somethingProcessed = true;
                 processedRows.insert (row_i);
             }
