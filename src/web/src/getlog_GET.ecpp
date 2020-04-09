@@ -682,8 +682,8 @@ UserInfo user;
         log_error ("%s", message.c_str ());
 
         // TODO: Use (define?) a dedicated exception class; maybe employ bios_throw
-        if (logname_isRealFile && e.what().find( TRANSLATE_ME ("Could not open requested logfile: ") ) != std::string::npos) {
-            http_die ("not-found", logname_base);
+        if (logname_isRealFile && std::string{e.what()}.find( TRANSLATE_ME ("Could not open requested logfile: ") ) != std::string::npos) {
+            http_die ("not-found", logname_base.c_str());
         } else {
             std::string err =  TRANSLATE_ME ("Exception caught. Please check logs for more details.");
             http_die ("internal-error", err.c_str ());
