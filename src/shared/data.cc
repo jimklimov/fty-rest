@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2015 - 2018 Eaton
+ * Copyright (C) 2015 - 2020 Eaton
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -492,7 +492,7 @@ std::vector<std::pair<uint32_t, db_reply_t>> asset_manager::delete_item(
                 checkAndAddInfo(conn, element_info, info);
 
                 if (!children.empty()) {
-                    throw CheckException(id, TRANSLATE_ME("can't delete because of the asset has a children"));
+                    throw CheckException(id, TRANSLATE_ME("can't delete the asset because it has at least one child"));
                 }
 
 
