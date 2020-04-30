@@ -120,7 +120,14 @@ bool database_ready;
         // the user does not stare at a spinner for minutes and wonder
         // if the new instance has frozen.
 
-        log_info ("Starting db service .." );
+        // Note: here and below we log progress with the timestamps,
+        // because it seems that log_info() et al are cached into a
+        // buffer and only get to syslog or journal when the request
+        // processing completes - and the lines are all timestamped
+        // at that moment. This makes investigation of how long the
+        // start-db-services and related activities took very hard.
+        uint64_t tme_start = ::time (NULL);
+        log_info ("Starting db service, timestamp=%" PRIu64 " ..." , tme_start);
         MlmSubprocess::Argv proc_cmd {"/usr/libexec/fty/start-db-services"};
         std::string proc_out, proc_err;
 
@@ -129,6 +136,9 @@ bool database_ready;
         // even though the actual services of our product have started
         // long before this; so even if it failed - try to use the DB...
         int rv_svc = MlmSubprocess::simple_output (proc_cmd, proc_out, proc_err);
+        uint64_t tme_finish = ::time (NULL);
+        log_info ("Starting db service completed, timestamp=%" PRIu64 " (duration=%" PRIu64 "), exit-code=%i ..." ,
+            tme_finish, (tme_finish - tme_start), rv_svc);
         if (rv_svc != 0) {
             log_error ("Starting of start-db-services have failed. Consult system logs");
             log_error ("%s failed with code %d.\n===== STDOUT: =====\n%s\n===== STDERR: =====\n%s\n=====",
@@ -187,7 +197,8 @@ bool database_ready;
         }
 
         // once done, check environment files for accessing the database
-        log_info ("db services were started, re-reading password ...");
+        uint64_t tme_started = ::time (NULL);
+        log_info ("db services were started by timestamp=%" PRIu64 ", re-reading password ...", tme_started);
         int rv_dbcred = DBConn::dbreadcredentials ();
         if (!rv_dbcred) {
             std::string message;
@@ -203,7 +214,8 @@ bool database_ready;
     } else {
         // enforce reload of credentials, e.g. if timely service startup
         // had failed previously but the system has caught up by now
-        log_info ("db services were already started and set up, re-reading password just in case ...");
+        uint64_t tme_started = ::time (NULL);
+        log_info ("db services were already started and set up before timestamp=%" PRIu64 ", re-reading password just in case ...", tme_started);
         if (!DBConn::dbreadcredentials ()) {
             std::string err =  TRANSLATE_ME ("Database password file is missing");
             log_error_audit ("Request CREATE license FAILED");
@@ -245,7 +257,8 @@ bool database_ready;
     log_info ("license was accepted, db services were started, db credentials were refreshed");
     log_debug ("Current DB URL is: %s", DBConn::url.c_str ());
 
-    log_info ("Making sure webserver can already connect to database...");
+    uint64_t tme_dbcheck = ::time (NULL);
+    log_info ("Making sure webserver can already connect to database after timestamp=%" PRIu64 " ...", tme_dbcheck);
     // Note: if we earlier failed to dbreadcredentials () and have no envvars
     // set in the tntnet process now (DB_USER, DB_PASSWD), the mysql/mariadb
     // client library will fall back to reading $HOME/.my.cnf and normally
@@ -273,12 +286,15 @@ bool database_ready;
     } catch (std::exception &e) {
         // TODO: Check/evaluate accessibility of /run namespace and
         // restart myself like `kill (getpid ())` if there are issues?
-        log_error ("Database connection test failed: %s", e.what ());
+        uint64_t tme_dbfail = ::time (NULL);
+        log_error ("Database connection test failed at timestamp=%" PRIu64 ": %s", tme_dbfail, e.what ());
         database_ready = false;
         std::string err =  TRANSLATE_ME ("Database connection test failed");
         log_error_audit ("Request CREATE license FAILED");
         http_die ("internal-error", err.c_str ());
     }
+    uint64_t tme_dbconnok = ::time (NULL);
+    log_info ("Successfully checked that webserver can connect to database after timestamp=%" PRIu64 " ...", tme_dbconnok);
     log_info_audit ("Request CREATE license SUCCESS");
 }
 </%cpp>
