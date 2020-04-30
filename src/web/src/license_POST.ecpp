@@ -107,12 +107,19 @@ bool database_ready;
         // call fty-db-init to start mysql and initialize the database
         // and more importantly - wait for initialization to complete
         // (it should have got started via systemd .path unit by now)
-        // before we try to re-read credentials below.
+        // before we try to re-read credentials below. Also waits for
+        // other components of the ecosystem (the services WantedBy
+        // out bios.target) which can play a role in REST API backend
+        // as used by the initial setup wizard and/or dashboard soon.
         // TODO: depending on storage and other external conditions,
         // this operation can take a while. The tntnet web server can
         // consider this thread "hung" and would self-restart after
         // 10 minutes; if this does happen - we should add a thread
         // to report "we're alive" to the server while waiting...
+        // This can be also used to update progress info for UI, so
+        // the user does not stare at a spinner for minutes and wonder
+        // if the new instance has frozen.
+
         log_info ("Starting db service .." );
         MlmSubprocess::Argv proc_cmd {"/usr/libexec/fty/start-db-services"};
         std::string proc_out, proc_err;
