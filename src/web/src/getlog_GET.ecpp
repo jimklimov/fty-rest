@@ -333,6 +333,7 @@ UserInfo user;
         bool isRealFile;
     } logsData [] = {
         { "messages",       "/var/log/messages", true },
+        { "verify-fs",      "/var/log/verify-fs.log", true },
         { "www-audit",      "/var/log/tntnet/www-audit.log", true },
         { "mass-mgr-audit", "/var/log/etn-mass-management.audit.log", true },
         { "emc4j-audit",    "/var/log/etn-emc4j-ipm2/karaf.log", true },
