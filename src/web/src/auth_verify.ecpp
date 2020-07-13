@@ -75,7 +75,7 @@ if(!checked_access_token.empty()) {
         // would handle auth token processing and verification with higher
         // priority than this code. In builds using *this* module, default to
         // pretending the re-auth happened successfully if the session is OK.
-        {
+        if (!user.reauthInitialized()) {
             const char *envvar = getenv("REAUTH_FALLBACK_DEFAULT");
 
             // The hardcoded default in absence of envvar or invalid value in
@@ -90,7 +90,7 @@ if(!checked_access_token.empty()) {
                 }
             }
             user.reauthDefault (defaultval);
-        } // scope
+        } // if reauth flag was not definitely set yet; else don't waste time
     } else {
         http_die("not-authorized", "");
     }
