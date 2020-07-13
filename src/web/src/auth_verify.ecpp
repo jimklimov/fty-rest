@@ -69,6 +69,28 @@ if(!checked_access_token.empty()) {
         user.gid (gid);
         user.login (user_name);
         delete[] user_name; user_name = NULL;
+
+        // Some of our code expects re-authentication for sensitive requests,
+        // if implemented by a third-party extended authentication module that
+        // would handle auth token processing and verification with higher
+        // priority than this code. In builds using *this* module, default to
+        // pretending the re-auth happened successfully if the session is OK.
+        {
+            const char *envvar = getenv("REAUTH_FALLBACK_DEFAULT");
+
+            // The hardcoded default in absence of envvar or invalid value in
+            // it - allows sensitive components to work with a valid token and
+            // no reauth implementation (passed from third-party servlets).
+            bool defaultval = true;
+            if ( envvar != NULL) {
+                if ( (!strncasecmp("TRUE", envvar, 4)) || (!strncasecmp("YES", envvar, 3)) || (!strncasecmp("ON", envvar, 2)) || (!strncasecmp("1", envvar, 1)) ) {
+                    defaultval = true;
+                } else if ( (!strncasecmp("FALSE", envvar, 5)) || (!strncasecmp("NO", envvar, 2)) || (!strncasecmp("OFF", envvar, 3)) || (!strncasecmp("0", envvar, 1)) ) {
+                    defaultval = false;
+                }
+            }
+            user.reauthDefault (defaultval);
+        } // scope
     } else {
         http_die("not-authorized", "");
     }
