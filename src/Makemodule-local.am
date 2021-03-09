@@ -141,7 +141,7 @@ package_CLIENTS_BIOS_CSV =    $(DESTDIR)$(bindir)/bios-csv
 ci_helperdir =         $(clientdir)
 
 ECPPC ?= ecppc
-ECPPFLAGS = --nolog
+ECPPFLAGS = --nolog -L
 ECPPFLAGS_CPP = -I$(top_builddir)/include -I$(top_srcdir)/include
 
 ECPPFILES= \
