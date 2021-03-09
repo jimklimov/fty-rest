@@ -143,13 +143,6 @@ ci_helperdir =         $(clientdir)
 ECPPC ?= ecppc
 ECPPFLAGS = --nolog
 ECPPFLAGS_CPP = -I$(top_builddir)/include -I$(top_srcdir)/include
-# By default eccpc embeds #line macros into generated .cc files to help the
-# debug messages pinpoint real culprits with __FILE__ and __LINE__ values.
-# These macros point to a relative path starting with "./src/" which is not
-# resolvable in e.g. distcheck builds (where real source is in ../src looking
-# from the compiler working directory), so we -I the top dir(s) for ecpp too,
-# and with absolute path at that since it mostly helps ccache during a build:
-ECPPFLAGS_CPP += -I$(abstop_builddir) -I$(abstop_srcdir)
 
 ECPPFILES= \
   web/src/add_gpio.ecpp \
@@ -236,6 +229,15 @@ src_libfty_rest_la_CPPFLAGS += -I$(abs_top_builddir)/include
 # Find the fty_rest_classes.h which is under src and not part of builddir
 src_libfty_rest_la_CXXFLAGS += -I$(abs_top_srcdir)/src
 src_libfty_rest_la_CPPFLAGS += -I$(abs_top_srcdir)/src
+
+# By default eccpc embeds #line macros into generated .cc files to help the
+# debug messages pinpoint real culprits with __FILE__ and __LINE__ values.
+# These macros point to a relative path starting with "./src/" which is not
+# resolvable in e.g. distcheck builds (where real source is in ../src looking
+# from the compiler working directory), so we -I the top dir(s) for ecpp too,
+# and with absolute path at that since it mostly helps ccache during a build:
+src_libfty_rest_la_CXXFLAGS += -I$(abs_top_builddir) -I$(abs_top_srcdir)
+src_libfty_rest_la_CPPFLAGS += -I$(abs_top_builddir) -I$(abs_top_srcdir)
 
 #----------------------------------------------------------------------
 #                        hook for make all => generate files too
